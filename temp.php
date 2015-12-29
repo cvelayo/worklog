@@ -5,7 +5,7 @@
  * Date: 12/23/2015
  * Time: 12:18 PM
  */
-require "connection.php";
+//require "connection.php";
 require "systemdefaults.inc.php";
 require "areadefaults.inc.php";
 require "config.inc.php";
@@ -166,7 +166,6 @@ function cell_html($cell, $query_strings, $is_invalid = FALSE)
     global $approval_enabled, $confirmation_enabled;
 
     $html = '';
-
     // if the time slot has got multiple bookings, then draw a mini-table
     if(isset($cell[1]["id"]))
     {
@@ -306,6 +305,7 @@ function cell_html($cell, $query_strings, $is_invalid = FALSE)
     // otherwise draw a cell, showing either the booking or a blank cell
     else
     {
+
         if(isset($cell[0]["id"]))
         {
             $id         = $cell[0]["id"];
@@ -353,14 +353,14 @@ function cell_html($cell, $query_strings, $is_invalid = FALSE)
             }
             // Add a class to bookings that this user is allowed to edit so that the
             // JavaScript can turn them into resizable bookings
-            if (getWritable($cell[0]['create_by'], $user, $cell[0]['room_id']))
+            /*if (getWritable($cell[0]['create_by'], $user, $cell[0]['room_id']))
             {
                 $c .= " writable";
                 if ($is_repeat)
                 {
                     $c .= " series";
                 }
-            }
+            }*/
         }
         else
         {
@@ -498,8 +498,8 @@ function map_add_booking ($row, &$column, $am7, $pm7)
     global $resolution;
     global $is_private_field;
 
-    $user = getUserName();
-    if (is_private_event($row['status'] & STATUS_PRIVATE) &&
+    //$user = getUserName();
+    /*if (is_private_event($row['status'] & STATUS_PRIVATE) &&
         !getWritable($row['entry_create_by'], $user, $row['room_id']))
     {
         $row['status'] |= STATUS_PRIVATE;   // Set the private bit
@@ -515,7 +515,7 @@ function map_add_booking ($row, &$column, $am7, $pm7)
     else
     {
         $row['status'] &= ~STATUS_PRIVATE;  // Clear the private bit
-    }
+    }*/
 
     $is_multiday_start = ($row['start_time'] < $am7);
     $is_multiday_end = ($row['end_time'] > ($pm7 + $resolution));
@@ -527,7 +527,6 @@ function map_add_booking ($row, &$column, $am7, $pm7)
     // of the calendar day which has the start of the booking day
     $start_s = nominal_seconds($start_t);
     $end_s = nominal_seconds($end_t);
-
     for ($s = $start_s; $s <= $end_s; $s += $resolution)
     {
         // find the first free index (in case there are multiple bookings in a timeslot)
@@ -536,7 +535,6 @@ function map_add_booking ($row, &$column, $am7, $pm7)
         {
             $n++;
         }
-
         // fill in the id, type and start time
         $column[$s][$n]["id"] = $row['entry_id'];
         $column[$s][$n]["is_repeat"] = isset($row['repeat_id']);
@@ -549,10 +547,10 @@ function map_add_booking ($row, &$column, $am7, $pm7)
         // if it's a multiple booking also fill in the name and description
         if ($n > 0)
         {
-            $column[$s][$n]["data"] = $row['name'];
-            $column[$s][$n]["long_descr"] = $row['entry_description'];
-            $column[$s][$n]["create_by"] = $row['entry_create_by'];
-            $column[$s][$n]["room_id"] = $row['room_id'];
+            $column[$s][$n]["data"] = $row['type'];
+            //$column[$s][$n]["long_descr"] = $row['entry_description'];
+            //$column[$s][$n]["create_by"] = $row['entry_create_by'];
+            //$column[$s][$n]["room_id"] = $row['room_id'];
         }
         // otherwise just leave them blank (we'll fill in the first whole slot later)
         // use NULL rather than '' just in case the value really is ''
@@ -595,9 +593,9 @@ function map_add_booking ($row, &$column, $am7, $pm7)
             {
                 // Move the name and description into the new first slot and decrement the number of slots
                 $column[$end_s + $resolution][0]["data"]       = $column[$end_s][0]["data"];
-                $column[$end_s + $resolution][0]["long_descr"] = $column[$end_s][0]["long_descr"];
-                $column[$end_s + $resolution][0]["create_by"]  = $column[$end_s][0]["create_by"];
-                $column[$end_s + $resolution][0]["room_id"]    = $column[$end_s][0]["room_id"];
+                //$column[$end_s + $resolution][0]["long_descr"] = $column[$end_s][0]["long_descr"];
+                //$column[$end_s + $resolution][0]["create_by"]  = $column[$end_s][0]["create_by"];
+                //$column[$end_s + $resolution][0]["room_id"]    = $column[$end_s][0]["room_id"];
                 $column[$end_s + $resolution][0]["slots"]      = $column[$end_s][0]["slots"] - 1;
             }
         }
@@ -655,9 +653,9 @@ function map_add_booking ($row, &$column, $am7, $pm7)
             $column[$r][$i]["slots"]--;
             // and put the name and description in the multiply booked slot
             $column[$start_s][0]["data"]       = $column[$r][$i]["data"];
-            $column[$start_s][0]["long_descr"] = $column[$r][$i]["long_descr"];
-            $column[$start_s][0]["create_by"]  = $column[$r][$i]["create_by"];
-            $column[$start_s][0]["room_id"]    = $column[$r][$i]["room_id"];
+            //$column[$start_s][0]["long_descr"] = $column[$r][$i]["long_descr"];
+            //$column[$start_s][0]["create_by"]  = $column[$r][$i]["create_by"];
+            //$column[$start_s][0]["room_id"]    = $column[$r][$i]["room_id"];
         }
     }
 
@@ -665,10 +663,10 @@ function map_add_booking ($row, &$column, $am7, $pm7)
     // slot for the booking (provided it's not a multiple booking slot)
     if (!isset($column[$first_slot][1]["id"]))
     {
-        $column[$first_slot][0]["data"]       = $row['name'];
-        $column[$first_slot][0]["long_descr"] = $row['entry_description'];
-        $column[$first_slot][0]["create_by"]  = $row['entry_create_by'];
-        $column[$first_slot][0]["room_id"]    = $row['room_id'];
+        $column[$first_slot][0]["data"]       = $row['type'];
+        //$column[$first_slot][0]["long_descr"] = $row['entry_description'];
+        //$column[$first_slot][0]["create_by"]  = $row['entry_create_by'];
+        //$column[$first_slot][0]["room_id"]    = $row['room_id'];
         $column[$first_slot][0]["slots"]      = $n_slots;
     }
 
@@ -681,7 +679,7 @@ function week_table_innerhtml($day, $month, $year, $user, $timetohighlight=NULL)
     global $resolution, $morningstarts, $morningstarts_minutes, $eveningends, $eveningends_minutes;
     global $weekstarts, $strftime_format;
     global $first_last_width, $column_hidden_width, $hidden_days;
-    global $mysqli;
+    global $sql_mysqli_conn;
 
     // Check that we've got a valid, enabled room
     $sql = "SELECT COUNT(*)
@@ -689,13 +687,12 @@ function week_table_innerhtml($day, $month, $year, $user, $timetohighlight=NULL)
            WHERE code='$user'
              AND disabled=0";
 
-    $n_users = sql_mysqli_query1($sql, $mysqli);
+    $n_users = sql_mysqli_query1($sql, $sql_mysqli_conn);
     if (($n_users < 0) || ($n_users > 1))
     {
         if ($n_users < 0)
         {
             // SQL error, probably because the tables haven't been created
-            echo $n_users;
             trigger_error(sql_error(), E_USER_WARNING);
         }
         else
@@ -771,13 +768,13 @@ function week_table_innerhtml($day, $month, $year, $user, $timetohighlight=NULL)
 
     for ($j = 0; $j<=($num_of_days-1) ; $j++)
     {
-        $sql = "SELECT user, starttime, endtime, type, number, repeat_id,
+
+        $sql = "SELECT user, start_time, end_time, type, number, repeat_id,
                    id AS entry_id
               FROM times
              WHERE user = '$user'
-               AND starttime <= $pm7[$j] AND endtime > $am7[$j]
-          ORDER BY starttime";   // necessary so that multiple bookings appear in the right order
-
+               AND start_time <= $pm7[$j] AND end_time > $am7[$j]
+          ORDER BY start_time";   // necessary so that multiple bookings appear in the right order
         // Each row returned from the query is a meeting. Build an array of the
         // form:  $week_map[room][weekday][slot][x], where x = id, color, data, long_desc.
         // [slot] is based at 000 (HHMM) for midnight, but only slots within
@@ -800,7 +797,7 @@ function week_table_innerhtml($day, $month, $year, $user, $timetohighlight=NULL)
 
             for ($i = 0; ($row = sql_row_keyed($res, $i)); $i++)
             {
-                map_add_booking($row, $week_map[$room][$j], $am7[$j], $pm7[$j]);
+                map_add_booking($row, $week_map[0][$j], $am7[$j], $pm7[$j]);
             }
         }
     }  // for ($j = 0; ...
@@ -829,7 +826,6 @@ function week_table_innerhtml($day, $month, $year, $user, $timetohighlight=NULL)
         // with times along the top and days of the week down the side
         $first_last_html = '<th class="first_last" style="width: ' . $first_last_width . '%">' .
             get_vocab('date') . ":</th>\n";
-        echo $first_last_html;
         $header_inner .= $first_last_html;
 
         $column_width = get_main_column_width($n_time_slots);
@@ -914,7 +910,7 @@ function week_table_innerhtml($day, $month, $year, $user, $timetohighlight=NULL)
     $tbody = "<tbody>\n";
     // URL for highlighting a time. Don't use REQUEST_URI or you will get
     // the timetohighlight parameter duplicated each time you click.
-    $base_url="week.php?year=$year&amp;month=$month&amp;day=$day&amp;area=$area&amp;room=$room";
+    $base_url="temp.php?year=$year&amp;month=$month&amp;day=$day&amp;area=$area&amp;room=$room";
     $row_class = "even_row";
 
     // We can display the table in two ways
@@ -955,14 +951,14 @@ function week_table_innerhtml($day, $month, $year, $user, $timetohighlight=NULL)
                 {
                     $is_invalid = $is_possibly_invalid[$thisday] && is_invalid_datetime(0, 0, $s, $wmonth, $wday, $wyear);
                     // set up the query strings to be used for the link in the cell
-                    $query_strings = get_query_strings($area, $room, $wmonth, $wday, $wyear, $s);
+                    $query_strings = get_query_strings($user, $wmonth, $wday, $wyear, $s);
 
                     // and then draw the cell
-                    if (!isset($week_map[$room][$thisday][$s]))
+                    if (!isset($week_map[0][$thisday][$s]))
                     {
-                        $week_map[$room][$thisday][$s] = array();  // to avoid an undefined index NOTICE error
+                        $week_map[0][$thisday][$s] = array();  // to avoid an undefined index NOTICE error
                     }
-                    $tbody .= cell_html($week_map[$room][$thisday][$s], $query_strings, $is_invalid);
+                    $tbody .= cell_html($week_map[0][$thisday][$s], $query_strings, $is_invalid);
                 }  // end looping through the time slots
                 if ( FALSE != $row_labels_both_sides )
                 {
@@ -1016,13 +1012,12 @@ function week_table_innerhtml($day, $month, $year, $user, $timetohighlight=NULL)
                     $wyear = date("Y", $wt);
                     $is_invalid = $is_possibly_invalid[$thisday] && is_invalid_datetime(0, 0, $s, $wmonth, $wday, $wyear);
                     $query_strings = get_query_strings($user, $wmonth, $wday, $wyear, $s);
-
                     // and then draw the cell
-                    if (!isset($week_map[$room][$thisday][$s]))
+                    if (!isset($week_map[0][$thisday][$s]))
                     {
-                        $week_map[$room][$thisday][$s] = array();  // to avoid an undefined index NOTICE error
+                        $week_map[0][$thisday][$s] = array();  // to avoid an undefined index NOTICE error
                     }
-                    $tbody .= cell_html($week_map[$room][$thisday][$s], $query_strings, $is_invalid);
+                    $tbody .= cell_html($week_map[0][$thisday][$s], $query_strings, $is_invalid);
                 }
 
             }    // for loop
@@ -1235,18 +1230,20 @@ if (!isset($_GET['user'])){
     echo '<h1>Select your log</h1>';
     $sql = "SELECT DISTINCT team
          FROM users";
-$result = $mysqli -> query($sql);
+$result = $sql_mysqli_conn -> query($sql);
 
     while($row = $result->fetch_assoc()){
         $team = $row['team'];
         echo '<h2>' . $team . '</h2>';
         $sql2 = "SELECT * FROM users WHERE team ='" . $team . "' ORDER BY name  ";
 
-        $result2 = $mysqli -> query($sql2);
+        $result2 = $sql_mysqli_conn -> query($sql2);
         while ($row2 = $result2->fetch_assoc()) {
             echo '<a href="temp.php?user=' . $row2['code'] . '">' . $row2['name'] . '</a><br />';
         }
     }
+    $result -> free();
+    $result2 -> free();
 } else {
 
     $timetohighlight = get_form_var('timetohighlight', 'int');
@@ -1303,5 +1300,5 @@ $result = $mysqli -> query($sql);
 
     output_trailer();
 }
-$mysqli -> close();
+
 ?>

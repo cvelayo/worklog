@@ -117,7 +117,7 @@ function print_theme_header($day, $month, $year, $user)
           }
           ?>
           <div id="mrbs">
-            <a href="index.php"><?php echo get_vocab("mrbs") ?></a>
+            <a href="temp.php"><?php echo get_vocab("mrbs") ?></a>
           </div>
         </div>
       </td>

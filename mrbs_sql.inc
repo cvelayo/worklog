@@ -1,6 +1,7 @@
 <?php
 // $Id$
-
+require "connection.php";
+global $mysqli;
 define('INTERVAL_DAY', 0);
 
 /** mrbsCheckFree()
@@ -17,21 +18,21 @@ define('INTERVAL_DAY', 0);
  */
 function mrbsCheckFree(&$booking, $ignore, $repignore)
 {
-  global $tbl_entry;
+  //global $tbl_entry;
   global $enable_periods, $periods, $twentyfourhour_format;
   global $strftime_format, $is_private_field;
-
-  $room_id = $booking['room_id'];
-  $user = getUserName();
+  $tbl_entry = 'times';
+  $user= $booking['user'];
+  //$user = getUserName();
   
-  get_area_settings(get_area($room_id));
+  //get_area_settings(get_area($room_id));
 
   // Select any meetings which overlap for this room:
-  $sql = "SELECT id, name, start_time, create_by, status
+  $sql = "SELECT id, start_time
             FROM $tbl_entry
            WHERE start_time < ${booking['end_time']}
              AND end_time > ${booking['start_time']}
-             AND room_id = $room_id";
+             AND user = '$user'";
 
   if ($ignore > 0)
   {
@@ -42,8 +43,9 @@ function mrbsCheckFree(&$booking, $ignore, $repignore)
     $sql .= " AND repeat_id <> $repignore";
   }
   $sql .= " ORDER BY start_time";
-
-  $res = sql_query($sql);
+  echo $sql;
+  global $sql_mysqli_conn;
+  $res = $sql_mysqli_conn -> query($sql);
   if (! $res)
   {
     // probably because the table hasn't been created properly
@@ -56,7 +58,7 @@ function mrbsCheckFree(&$booking, $ignore, $repignore)
     return "";
   }
   // Get the room's area ID for linking to day, week, and month views:
-  $area = mrbsGetRoomArea($room_id);
+  //$area = mrbsGetRoomArea($room_id);
 
   // Build an listing all the conflicts:
   $err = array();
@@ -87,8 +89,8 @@ function mrbsCheckFree(&$booking, $ignore, $repignore)
     // enclose  the viewday etc. links in a span to make it easier for JavaScript to strip them out
     $err[] = "<a href=\"view_entry.php?id=".$row['id']."\">".$row['name']."</a>"
       . " (" . $startstr . ") "
-      . "<span>(<a href=\"day.php?$param_ymd\">".get_vocab("viewday")."</a>"
-      . " | <a href=\"week.php?room=$room_id&amp;$param_ymd\">".get_vocab("viewweek")."</a>"
+      . "<span>(<a href=\"temp.php?$param_ymd\">".get_vocab("viewday")."</a>"
+      . " | <a href=\"temp.php?room=$room_id&amp;$param_ymd\">".get_vocab("viewweek")."</a>"
       . " | <a href=\"month.php?room=$room_id&amp;$param_ym\">".get_vocab("viewmonth")."</a>)</span>";
   }
 
@@ -104,7 +106,7 @@ function check_interval(&$booking, $ignore, $repignore, $interval_type='day', $o
 {
   global $max_per_interval_global, $max_per_interval_area;
   global $tbl_entry, $tbl_room;
-  
+
   // Get the area id.   We only need to do this once as all bookings will be
   // in the same area.
   static $area_id = NULL;
@@ -112,18 +114,18 @@ function check_interval(&$booking, $ignore, $repignore, $interval_type='day', $o
   {
     $area_id = get_area($booking['room_id']);
   }
-  
-  // Get the location for indexing the $existing and $proposed arrays.   If it's a 
+
+  // Get the location for indexing the $existing and $proposed arrays.   If it's a
   // global check then $location = 0, otherwise use the area_id.
   $location = ($only_area) ? $area_id : 0;
-  
+
   // Set up arrays recording the number of existing and proposed bookings for the interval,
-  // indexed by the interval type and the Unix time at the start of that interval.  These 
+  // indexed by the interval type and the Unix time at the start of that interval.  These
   // are static variables because we test all the proposed bookings, which could be for
-  // multiple rooms and/or for repeat bookings, before making the booking. 
+  // multiple rooms and/or for repeat bookings, before making the booking.
   static $existing = array();
   static $proposed = array();
-  
+
   // Loop through all the intervals in the proposed booking, counting how many bookings
   // already exist for that interval, and incrementing the number of proposed bookings
   // by one
@@ -190,7 +192,7 @@ function check_interval(&$booking, $ignore, $repignore, $interval_type='day', $o
       {
         $sql .= " AND E.repeat_id <> $repignore";
       }
-      
+
       $existing[$location][$interval_type][$interval_start] = sql_query1($sql);
       if ($existing[$location][$interval_type][$interval_start] < 0)
       {
@@ -217,24 +219,24 @@ function check_interval(&$booking, $ignore, $repignore, $interval_type='day', $o
         return get_vocab("max_per_${interval_type}_global") . " $max_per_interval_global[$interval_type]";
       }
     }
-      
+
     $interval_start = $interval_end;
     $i++;
   }
-  
+
   return NULL;
 }
 
 
 /** mrbsCheckPolicy()
- * 
+ *
  * Check to see if a proposed booking conforms to any booking policies in force.
  * Can be used both for creating an entry as well as deleting an entry
- * 
+ *
  * $booking   - The booking in question - an associative array
  * $delete    - TRUE: We're intending to delete an entry
  *            - FALSE:  We're intending to create an entry (the default)
- * 
+ *
  * Returns:
  *            - An array of human readable errors.   If no errors the array has
  *              length 0
@@ -252,19 +254,19 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
   global $interval_types, $strftime_format;
 
   $errors = array();
-  
+
   // The booking policies don't apply to booking admins for this room
   $user = getUserName();
   if (auth_book_admin($user, $booking['room_id']))
   {
     return $errors;
   }
-   
+
   // Because MRBS has no notion of where we are in the day if we're using periods,
   // we'll just assume that we're at the beginning of the day.
   $now = ($enable_periods) ? mktime(0, 0, 0) : time();
   // We'll also round $min_*_ahead_secs and $max_*_ahead_secs down to the nearest whole day
-  
+
   // Check deletion policies
   if ($delete)
   {
@@ -281,7 +283,7 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
         $errors[] = get_vocab('min_delete_time_before', $min_delete_ahead, $units);
       }
     }
-    
+
     if ($max_delete_ahead_enabled)
     {
       if ($enable_periods)
@@ -296,7 +298,7 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
       }
     }
   }
-  
+
   // Check creation policies
   else
   {
@@ -313,9 +315,9 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
         $errors[] = get_vocab('min_create_time_before', $min_create_ahead, $units);
       }
     }
-    
-    // For the max_create_ahead case we check the endtime of the booking rather than the starttime.
-    // This prevents somebody booking the slot they want by booking a starttime within the period
+
+    // For the max_create_ahead case we check the end_time of the booking rather than the start_time.
+    // This prevents somebody booking the slot they want by booking a start_time within the period
     // and then using a very long duration.
     if ($max_create_ahead_enabled)
     {
@@ -331,7 +333,7 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
       }
     }
   }
-  
+
   // Check min_booking_date
   if ($min_booking_date_enabled && !$delete)
   {
@@ -348,7 +350,7 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
       trigger_error("Invalid min_book_ahead_date", E_USER_NOTICE);
     }
   }
-  
+
   // Check max_booking_date
   if ($max_booking_date_enabled && !$delete)
   {
@@ -365,7 +367,7 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
       trigger_error("Invalid max_book_ahead_date", E_USER_NOTICE);
     }
   }
-  
+
   // Check max_duration (but not if we're deleting a booking)
   if ($max_duration_enabled && !$delete)
   {
@@ -383,9 +385,9 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
         $start['minutes'] -= $n_periods;
         $start['mday']++;
       }
-      $max_endtime = mktime($start['hours'], $start['minutes'], $start['seconds'],
+      $max_end_time = mktime($start['hours'], $start['minutes'], $start['seconds'],
                             $start['mon'], $start['mday'], $start['year']);
-      if ($booking['end_time'] > $max_endtime)
+      if ($booking['end_time'] > $max_end_time)
       {
         $errors[] = get_vocab("max_booking_duration") . " $max_duration_periods " .
                     (($max_duration_periods > 1) ? get_vocab("periods") : get_vocab("period_lc"));
@@ -398,7 +400,7 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
       $errors[] = get_vocab("max_booking_duration") . " $max_duration $units";
     }
   }
-  
+
   // Check max number of bookings allowed per interval for this user for each of
   // the interval types, both globally and for the area
   foreach ($interval_types as $interval_type)
@@ -422,15 +424,15 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
       }
     }
   }
-  
+
   return $errors;
 }
 
 /** mrbsDelEntry()
- * 
+ *
  * Delete an entry, or optionally all entries.   Will also delete any newly
  * orphaned rows in the repeat table.
- * 
+ *
  * $user   - Who's making the request
  * $id     - The entry to delete
  * $series - If set, delete the series, except user modified entries
@@ -443,7 +445,7 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
 function mrbsDelEntry($user, $id, $series, $all)
 {
   global $tbl_entry, $tbl_repeat;
-  
+
   $start_times = array();
 
   // Get the repeat_id and room_id for this entry
@@ -457,7 +459,7 @@ function mrbsDelEntry($user, $id, $series, $all)
   $room_id = $row['room_id'];
 
   $sql = "SELECT start_time, end_time, room_id, create_by, id, entry_type FROM $tbl_entry WHERE ";
-   
+
   if ($series)
   {
     $sql .= "repeat_id=$repeat_id";
@@ -475,19 +477,19 @@ function mrbsDelEntry($user, $id, $series, $all)
     {
       continue;
     }
-   
+
     if ($series && $row['entry_type'] == ENTRY_RPT_CHANGED && !$all)
     {
       continue;
     }
-    
+
     // check that the booking policies allow us to delete this entry
     $tmp = mrbsCheckPolicy($row, 0, 0, TRUE);
     if (!empty($tmp))
     {
       continue;
     }
-   
+
     if (sql_command("DELETE FROM $tbl_entry WHERE id=" . $row['id']) > 0)
     {
       $start_times[] = $row['start_time'];
@@ -507,12 +509,12 @@ function mrbsDelEntry($user, $id, $series, $all)
 
 
 /** mrbsCreateEntry()
- * 
+ *
  * Create an entry in the database
- * 
+ *
  * $table         - The table in which to create the entry
  * $data          - An array containing the row data for the entry
- * 
+ *
  * Returns:
  *   0        - An error occurred while inserting the entry
  *   non-zero - The entry's ID
@@ -520,13 +522,13 @@ function mrbsDelEntry($user, $id, $series, $all)
 function mrbsCreateEntry($table, $data)
 {
   global $standard_fields, $db_tbl_prefix;
-  
+
   $sql_col = array();
   $sql_val = array();
   $table_no_prefix = utf8_substr($table, utf8_strlen($db_tbl_prefix));  // strip the prefix off the table name
-    
+
   $fields = sql_field_info($table);
-  
+
   foreach ($fields as $field)
   {
     $key = $field['name'];
@@ -551,8 +553,8 @@ function mrbsCreateEntry($table, $data)
           $sql_col[] = $key;
           $sql_val[] = (isset($data[$key])) ? (int)$data[$key] : 'NULL';
           break;
-        
-        // strings  
+
+        // strings
         case 'create_by':
         case 'modified_by':
         case 'name':
@@ -564,14 +566,14 @@ function mrbsCreateEntry($table, $data)
           $sql_col[] = $key;
           $sql_val[] = (isset($data[$key])) ? "'" . sql_escape($data[$key]) . "'" : 'NULL';
           break;
-      
+
         // special case - rep_opt
         case 'rep_opt':
           // pgsql doesn't like empty strings
           $sql_col[] = $key;
           $sql_val[] = (empty($data[$key])) ? "'0'" : "'" . sql_escape($data[$key]) . "'";
           break;
-          
+
         // special case - rep_num_weeks
         case 'rep_num_weeks':
           if (!empty($data[$key]))
@@ -580,13 +582,13 @@ function mrbsCreateEntry($table, $data)
             $sql_val[] = $data[$key];
           }
           break;
-        
+
         default:
           // custom fields
           if (!in_array($key, $standard_fields[$table_no_prefix]))
           {
             $sql_col[] = $key;
-            
+
             // Depending on the nature of the custom field the treatment will vary
             switch ($field['nature'])
             {
@@ -614,19 +616,19 @@ function mrbsCreateEntry($table, $data)
                 }
                 break;
             } // switch ($field_natures[$key])
-            
+
             $sql_val[] = $value;
           }
           // do nothing for fields that aren't custom or otherwise listed above
           break;
-          
+
       } // switch ($key)
     } // if
   } // foreach
-  
+
   $sql_col = array_map('sql_quote', $sql_col);
   $sql = "INSERT INTO $table (" . implode(', ', $sql_col) . ") VALUES (" . implode(', ',$sql_val) . ")";
-  
+
   if (sql_command($sql) < 0)
   {
     // probably because the table hasn't been created properly
@@ -638,11 +640,11 @@ function mrbsCreateEntry($table, $data)
 }
 
 /** mrbsCreateSingleEntry()
- * 
+ *
  * Create a single (non-repeating) entry in the database
- * 
+ *
  * $data      - An array containing the entry details
- * 
+ *
  * Returns:
  *   0        - An error occurred while inserting the entry
  *   non-zero - The entry's ID
@@ -650,7 +652,7 @@ function mrbsCreateEntry($table, $data)
 function mrbsCreateSingleEntry($data)
 {
   global $tbl_entry;
-  
+  $tbl_entry = 'times';
   // make sure that any entry is of a positive duration
   // this is to trap potential negative duration created when DST comes
   // into effect
@@ -673,9 +675,9 @@ function mrbsCreateSingleEntry($data)
 }
 
 /** mrbsCreateRepeatEntry()
- * 
+ *
  * Creates a repeat entry in the data base
- * 
+ *
  * $data      - An array containing the entry details
  *
  * Returns:
@@ -685,7 +687,7 @@ function mrbsCreateSingleEntry($data)
 function mrbsCreateRepeatEntry($data)
 {
   global $tbl_repeat;
-  
+
   $result = mrbsCreateEntry($tbl_repeat, $data);
   return $result;
 }
@@ -708,14 +710,14 @@ function trimToEndOfMonth(&$month, &$day, &$year)
 
 
 /** mrbsGetRepeatEntryList
- * 
+ *
  * Returns a list of the repeating entries
- * 
+ *
  * $time          The start time
  * $enddate       When the repeat ends
  * $rep_details   An associative array containing the repeat details, indexed by
  *                  rep_type        What type of repeat is it
- *                  rep_opt         The repeat entries (if the repeat type is weekly then at least one 
+ *                  rep_opt         The repeat entries (if the repeat type is weekly then at least one
  *                                  repeat day must be set)
  *                  rep_num_weeks   The repeat frequency for weekly repeats
  *                  month_absolute  The repeat day of the month for monthly repeats
@@ -729,9 +731,9 @@ function trimToEndOfMonth(&$month, &$day, &$year)
 function mrbsGetRepeatEntryList($time, $enddate, $rep_details, $n)
 {
   $entries = array();
-  
+
   $date = getdate($time);
-  
+
   $sec         = $date['seconds'];
   $min         = $date['minutes'];
   $hour        = $date['hours'];
@@ -741,7 +743,7 @@ function mrbsGetRepeatEntryList($time, $enddate, $rep_details, $n)
   $start_day   = $date['wday'];
   $start_dom   = $day;  // the starting day of the month
   $start_month = $month;
-  
+
   // Make sure that the first date is a member of the series
   switch($rep_details['rep_type'])
   {
@@ -778,7 +780,7 @@ function mrbsGetRepeatEntryList($time, $enddate, $rep_details, $n)
     default:
       break;
   }
-  
+
   for ($i = 0; $i < $n; $i++)
   {
     $time = mktime($hour, $min, $sec, $month, $day, $year);
@@ -795,7 +797,7 @@ function mrbsGetRepeatEntryList($time, $enddate, $rep_details, $n)
       case REP_DAILY:
         $day++;
         break;
-      
+
       case REP_WEEKLY:
         $j = $cur_day = date("w", $time);
         // Skip over days of the week which are not enabled:
@@ -813,7 +815,7 @@ function mrbsGetRepeatEntryList($time, $enddate, $rep_details, $n)
         }
         while (($j != $cur_day) && !$rep_details['rep_opt'][$j]);
         break;
-      
+
       case REP_MONTHLY:
         do
         {
@@ -831,7 +833,7 @@ function mrbsGetRepeatEntryList($time, $enddate, $rep_details, $n)
         } while ($day === FALSE);
         trimToEndOfMonth($month, $day, $year);
         break;
-        
+
       case REP_YEARLY:
         // Get the day of the month back to where it should be (in case we
         // decremented it to make it a valid date last time round)
@@ -846,17 +848,17 @@ function mrbsGetRepeatEntryList($time, $enddate, $rep_details, $n)
         break;
     }
   }
-  
+
   return $entries;
 }
 
 
 /** mrbsCreateRepeatingEntrys()
- * 
+ *
  * Creates a repeat entry in the data base + all the repeating entrys
- * 
+ *
  * $data      - An array containing the entry details
- * 
+ *
  * Returns:
  *   an array
  *   ['id']          - 0 if an error occurred or if no bookings could be
@@ -869,7 +871,7 @@ function mrbsGetRepeatEntryList($time, $enddate, $rep_details, $n)
 function mrbsCreateRepeatingEntrys($data)
 {
   global $max_rep_entrys;
-  
+
   $result = array('id' => 0, 'series' => FALSE, 'start_times' => array());
 
   if (!isset($data['skip_list']))
@@ -889,9 +891,9 @@ function mrbsCreateRepeatingEntrys($data)
       $rep_details[$key] = $data[$key];
     }
   }
-                 
+
   $reps = mrbsGetRepeatEntryList($data['start_time'],
-                                 $data['end_date'], 
+                                 $data['end_date'],
                                  $rep_details,
                                  $max_rep_entrys);
 
@@ -902,7 +904,7 @@ function mrbsCreateRepeatingEntrys($data)
     $result['id'] = 0;
     return $result;;
   }
-  
+
   // If $reps is empty, then this is a single booking, so treat
   // it differently
   if (empty($reps))
@@ -915,7 +917,7 @@ function mrbsCreateRepeatingEntrys($data)
     $result['start_times'][] = $data['start_time'];
     return $result;
   }
-  
+
   // This is a repeat booking.   If we've got to skip past all
   // the entries, then don't make a booking!
   if (count($reps) == count($data['skip_list']))
@@ -923,12 +925,12 @@ function mrbsCreateRepeatingEntrys($data)
     $result['id'] = 0;
     return $result;;
   }
-  
+
   // Maybe one should also consider adjusting the start_time for
   // the repeat if the first (or more) entries of the series are
   // to be skipped.    However I haven't done so here and it gives the
   // maybe slightly strange result that the start date of the series won't
-  // have an entry on that date.   But then this is no different from 
+  // have an entry on that date.   But then this is no different from
   // the way MRBS works at present if you create a series and then
   // delete the first entry.
   //
@@ -938,15 +940,15 @@ function mrbsCreateRepeatingEntrys($data)
   //    MUST still be maintained by the calendaring and scheduling system
   //    because the original "DTSTART" value has inherent usage
   //    dependencies by other properties such as the "RECURRENCE-ID".'
-  
+
   $id = mrbsCreateRepeatEntry($data);
-    
+
   if ($id)
   {
     $data['entry_type'] = ENTRY_RPT_ORIGINAL;
     $data['repeat_id'] = $id;
-    $starttime = $data['start_time'];
-    $endtime = $data['end_time'];
+    $start_time = $data['start_time'];
+    $end_time = $data['end_time'];
     for ($i = 0; $i < count($reps); $i++)
     {
       // Provided this isn't one of the entries to skip, go ahead
@@ -955,8 +957,8 @@ function mrbsCreateRepeatingEntrys($data)
       {
         // calculate diff each time and correct where events
         // cross DST
-        $diff = $endtime - $starttime;
-        $diff += cross_dst($reps[$i], $reps[$i] + $diff);  
+        $diff = $end_time - $start_time;
+        $diff += cross_dst($reps[$i], $reps[$i] + $diff);
         $data['start_time'] = $reps[$i];
         $data['end_time'] = $reps[$i] + $diff;
 
@@ -976,14 +978,14 @@ function mrbsCreateRepeatingEntrys($data)
 function get_repeat_id($entry_id)
 {
   global $tbl_entry;
-  
+
   $sql = "SELECT repeat_id
             FROM $tbl_entry
            WHERE id=$entry_id
            LIMIT 1";
-           
+
   $res = sql_query($sql);
-  
+
   if ($res === FALSE)
   {
     trigger_error(sql_error(), E_USER_WARNING);
@@ -1002,7 +1004,7 @@ function get_repeat_id($entry_id)
 
 // Update the time of last reminding.
 // If the entry is part of a repeating series, then also increment
-// the last reminder time in the repeat table and all the individual 
+// the last reminder time in the repeat table and all the individual
 // entries.  (Although strictly speaking the reminder time should apply
 // either to a series or an individual entry, we update everything to
 // prevent users bombarding admins with reminder emails)
@@ -1012,7 +1014,7 @@ function get_repeat_id($entry_id)
 function update_last_reminded($id, $series)
 {
   global $tbl_entry, $tbl_repeat;
-  
+
   $now = time();
   if ($series)
   {
@@ -1063,7 +1065,7 @@ function update_last_reminded($id, $series)
 function update_more_info($id, $series, $user, $note)
 {
   global $tbl_entry, $tbl_repeat;
-  
+
   $table = ($series) ? $tbl_repeat : $tbl_entry;
   $now = time();
   $sql = "UPDATE $table SET";
@@ -1080,7 +1082,7 @@ function update_more_info($id, $series, $user, $note)
 // then the id is the id in the repeat table and we must approve
 // all the individual entries.
 // We also update the ical_sequence number so that any emails that
-// are generated will be treated by calendar clients as referring 
+// are generated will be treated by calendar clients as referring
 // to the same meeting, rather than a new meeting.
 //
 // Returns FALSE on failure, otherwise an array of start times that
@@ -1088,11 +1090,11 @@ function update_more_info($id, $series, $user, $note)
 function mrbsApproveEntry($id, $series)
 {
   global $tbl_entry, $tbl_repeat;
-  
+
   if ($series)
   {
     // First update the repeat table if it's a series
-    $sql = "UPDATE $tbl_repeat 
+    $sql = "UPDATE $tbl_repeat
                SET status=status&(~" . STATUS_AWAITING_APPROVAL . "),
                    ical_sequence=ical_sequence+1
              WHERE id=$id";  // PostgreSQL does not support LIMIT with UPDATE
@@ -1117,23 +1119,23 @@ function mrbsApproveEntry($id, $series)
 
   if (($start_times !== FALSE) && (count($start_times) != 0))
   {
-    $sql = "UPDATE $tbl_entry 
+    $sql = "UPDATE $tbl_entry
                SET status=status&(~" . STATUS_AWAITING_APPROVAL . "),
                    ical_sequence=ical_sequence+1
              WHERE $condition";  // PostgreSQL does not support LIMIT with UPDATE
-    
+
     if (sql_command($sql) < 0)
     {
       trigger_error(sql_error(), E_USER_WARNING);
       fatal_error(FALSE, get_vocab("fatal_db_error"));
     }
   }
-  
+
   if (is_array($start_times))
   {
     asort($start_times);
   }
-  
+
   return $start_times;
 }
 
@@ -1185,7 +1187,7 @@ function get_booking_info($id, $series, $silent=FALSE)
                  "A.disabled AS area_disabled",
                  "A.enable_periods",
                  "(end_time - start_time) AS duration");
-                 
+
   foreach ($table_fields as $field)
   {
     switch ($field['name'])
@@ -1224,12 +1226,12 @@ function get_booking_info($id, $series, $silent=FALSE)
           // exists in the repeat table
           fatal_error(0, "Custom fields problem, '".$field['name']."' exists in entry table but not in repeat table");
         }
-        
+
         array_push($terms, "T." . $field['name']);
         break;
     }
   }
-  
+
   $sql = "SELECT " . implode(", ",$terms)."
             FROM $table T, $tbl_room M, $tbl_area A
            WHERE T.room_id = M.id
@@ -1267,13 +1269,13 @@ function get_booking_info($id, $series, $silent=FALSE)
 
   $row = sql_row_keyed($res, 0);
   sql_free($res);
-  
+
   // Now get the duration.
   // Don't translate the units at this stage.   We'll translate them later.
   $d = get_duration($row['start_time'], $row['end_time'], $row['enable_periods'], FALSE);
   $row['duration'] = $d['duration'];
   $row['dur_units'] = $d['dur_units'];
-    
+
   // Get some extra information
   if ($series)
   {
@@ -1323,7 +1325,7 @@ function get_booking_info($id, $series, $silent=FALSE)
       sql_free($res);
     }
   }
-  
+
   return $row;
 }
 
@@ -1335,9 +1337,9 @@ function get_booking_info($id, $series, $silent=FALSE)
 /*function get_area_name($id, $all=FALSE)
 {
   global $tbl_area;
-  
+
   $id = (int)$id;
-  
+
   $sql = "SELECT area_name
             FROM $tbl_area
            WHERE id=$id";
@@ -1346,20 +1348,20 @@ function get_booking_info($id, $series, $silent=FALSE)
     $sql .= " AND disabled=0";
   }
   $sql .= " LIMIT 1";
-  
+
   $res = sql_query($sql);
-  
+
   if ($res === FALSE)
   {
     trigger_error(sql_error(), E_USER_WARNING);
     return FALSE;
   }
-  
+
   if (sql_count($res) == 0)
   {
     return NULL;
   }
-  
+
   $row = sql_row($res, 0);
   return $row[0];
 }*/
@@ -1371,9 +1373,9 @@ function get_booking_info($id, $series, $silent=FALSE)
 function get_room_name($id, $all=FALSE)
 {
   global $tbl_room;
-  
+
   $id = (int)$id;
-  
+
   $sql = "SELECT room_name
             FROM $tbl_room
            WHERE id=$id";
@@ -1382,20 +1384,20 @@ function get_room_name($id, $all=FALSE)
     $sql .= " AND disabled=0";
   }
   $sql .= " LIMIT 1";
-  
+
   $res = sql_query($sql);
-  
+
   if ($res === FALSE)
   {
     trigger_error(sql_error(), E_USER_WARNING);
     return FALSE;
   }
-  
+
   if (sql_count($res) == 0)
   {
     return NULL;
   }
-  
+
   $row = sql_row($res, 0);
   return $row[0];
 }
@@ -1407,18 +1409,18 @@ function get_room_name($id, $all=FALSE)
 /*function get_areas($all=FALSE)
 {
   global $tbl_area;
-  
+
   $areas = array();
-  
+
   $sql = "SELECT id, area_name FROM $tbl_area";
   if (empty($all))
   {
     $sql .= " WHERE disabled=0";
   }
   $sql .= " ORDER BY area_name";
-  
+
   $res = sql_query($sql);
-  
+
   if ($res === FALSE)
   {
     trigger_error(sql_error(), E_USER_WARNING);
@@ -1430,7 +1432,7 @@ function get_room_name($id, $all=FALSE)
       $areas[$row['id']] = $row['area_name'];
     }
   }
-  
+
   return $areas;
 }*/
 
@@ -1453,14 +1455,14 @@ function mrbsGetRoomArea($id)
 function mrbsAddArea($name, &$error)
 {
   global $maxlength, $tbl_area, $area_defaults, $boolean_fields;
-  
+
   // First of all check that we've got a name
   if (!isset($name) || ($name === ''))
   {
     $error = "empty_name";
     return FALSE;
   }
-  
+
   // Truncate the name field to the maximum length as a precaution.
   $name = utf8_substr($name, 0, $maxlength['area.area_name']);
   $area_name_q = sql_escape($name);
@@ -1533,14 +1535,14 @@ function mrbsAddArea($name, &$error)
 function mrbsAddRoom($name, $area, &$error, $description='', $capacity='')
 {
   global $maxlength, $tbl_room;
-  
+
   // First of all check that we've got a name
   if (!isset($name) || ($name === ''))
   {
     $error = "empty_name";
     return FALSE;
   }
-  
+
   // Truncate the name and description fields to the maximum length as a precaution.
   $name = utf8_substr($name, 0, $maxlength['room.room_name']);
   $description = utf8_substr($description, 0, $maxlength['room.description']);
@@ -1584,8 +1586,8 @@ function mrbsAddRoom($name, $area, &$error, $description='', $capacity='')
 function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $original_room_id=NULL, $send_mail=FALSE, $edit_type='')
 {
   global $max_rep_entrys, $enable_periods, $resolution, $mail_settings;
-  global $tbl_entry, $tbl_room, $tbl_area;
-
+  //global $tbl_entry, $tbl_room, $tbl_area;
+  $tbl_entry = 'times';
   // All the data, except for the status and room id, will be common
   // across the bookings
   $common = $bookings[0];
@@ -1598,6 +1600,7 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
   // (We do this before we adjust for DST so that the user sees what they expect to see)
   $duration = $duration_seconds;
   $date = getdate($common['start_time']);
+  echo $date;
   if ($enable_periods)
   {
     $period = (($date['hours'] - 12) * 60) + $date['minutes'];
@@ -1635,11 +1638,11 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
     $ignore_id = $id;
     $repeat_id = get_repeat_id($id);
   }
-  else
-  {
+  else {
     $ignore_id = 0;
     $repeat_id = NULL;
   }
+
 
   // Acquire mutex to lock out others trying to book the same slot(s).
   if (!sql_mutex_lock("$tbl_entry"))
@@ -1653,7 +1656,6 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
   $rules_broken = array();  // Holds an array of the rules that have been broken
   $skip_lists = array();    // Holds a 2D array of bookings to skip past.  Indexed
                             // by room id and start time
-                          
   // Check for any schedule conflicts in each room we're going to try and
   // book in;  also check that the booking conforms to the policy
   foreach ($bookings as $booking)
@@ -1669,11 +1671,10 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
           // cross DST
           $diff = $duration_seconds;
           $diff += cross_dst($reps[$i], $reps[$i] + $diff);
-          
+
           $this_booking = $booking;
           $this_booking['start_time'] = $reps[$i];
           $this_booking['end_time'] = $reps[$i] + $diff;
-
           $tmp = mrbsCheckFree($this_booking, $ignore_id, $repeat_id);
 
           $skip_this_booking = FALSE;
@@ -1702,7 +1703,7 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
           // because we're never going to make it)
           if (!$skip_this_booking)
           {
-            $errors = mrbsCheckPolicy($this_booking, $ignore_id, $repeat_id);
+            //$errors = mrbsCheckPolicy($this_booking, $ignore_id, $repeat_id);
             if (count($errors) > 0)
             {
               $valid_booking = FALSE;
@@ -1726,7 +1727,8 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
           $conflicts = array_merge($conflicts, $tmp);
         }
         // check that the booking conforms to the booking policy
-        $errors = mrbsCheckPolicy($booking, $ignore_id, 0);
+
+      //$errors = mrbsCheckPolicy($booking, $ignore_id, 0);
         if (count($errors) > 0)
         {
           $valid_booking = FALSE;
@@ -1735,12 +1737,12 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
     }
 
   } // end foreach bookings
-  
+
   // If we are editing an existing booking then we need to check that we are
   // allowed to delete it
   if (isset($id))
   {
-    
+
     if ($edit_type == "series")
     {
       $old_bookings = get_bookings_in_series($repeat_id);
@@ -1750,7 +1752,7 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
       $old_bookings = array();
       $old_bookings[] = getBooking($id);
     }
-    
+
     foreach ($old_bookings as $old_booking)
     {
       $errors = mrbsCheckPolicy($old_booking, FALSE, FALSE, TRUE);
@@ -1760,18 +1762,18 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
         $rules_broken = array_merge($rules_broken, $errors);
       }
     }
-    
+
   }
 
   // Tidy up the lists of conflicts and rules broken, getting rid of duplicates
   $conflicts = array_values(array_unique($conflicts));
   $rules_broken = array_values(array_unique($rules_broken));
-  
+
   $result = array();
   $result['valid_booking'] = $valid_booking;
   $result['rules_broken'] = $rules_broken;
   $result['conflicts'] = $conflicts;
-  
+
   // If we've just been asked to check the bookings, or if it wasn't a valid
   // booking, then stop here and return the results
   if ($just_check || !$valid_booking)
@@ -1779,10 +1781,10 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
     sql_mutex_unlock("$tbl_entry");
     return $result;
   }
-    
-  
+
+
   // Otherwise we go on to commit the booking
-  
+
   $new_details = array(); // We will pass this array in the Ajax result
   $rooms = array();
   foreach ($bookings as $booking)
@@ -1790,7 +1792,7 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
     $rooms[] = $booking['room_id'];
   }
   foreach ($bookings as $booking)
-  { 
+  {
     // We need to work out whether this is the original booking being modified,
     // because, if it is, we keep the ical_uid and increment the ical_sequence.
     // We consider this to be the original booking if there was an original
@@ -1803,8 +1805,8 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
     //          case we will make the arbitrary assumption that the original booking
     //          has been moved to the first room in the list and the bookings in the
     //          other rooms are clones and will be treated as new bookings.
-    
-    if (isset($original_room_id) && 
+
+    if (isset($original_room_id) &&
         (($original_room_id == $booking['room_id']) ||
          (count($rooms) == 1) ||
          (($rooms[0] == $booking['room_id']) && !in_array($original_room_id, $rooms))))
@@ -1853,19 +1855,21 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
     else
     {
       // Create the entry:
+      echo "Here is the error";
+
       $new_id = mrbsCreateSingleEntry($booking);
       $is_repeat_table = FALSE;
       $result['start_times'] = array($booking['start_time']);
     }
     $new_details[] = array('id' => $new_id, 'room_id' => $booking['room_id']);
     $booking['id'] = $new_id;  // Add in the id now we know it
-    
+
     // Send an email if neccessary, provided that the entry creation was successful
     if ($send_mail && !empty($new_id))
     {
       // Only send an email if (a) this is a changed entry and we have to send emails
       // on change or (b) it's a new entry and we have to send emails for new entries
-      if ((isset($id) && $mail_settings['on_change']) || 
+      if ((isset($id) && $mail_settings['on_change']) ||
           (!isset($id) && $mail_settings['on_new']))
       {
         require_once "functions_mail.inc";
@@ -1903,15 +1907,15 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
         // Send the email
         notifyAdminOnBooking($booking, $mail_previous, !isset($id), $is_repeat_table, $result['start_times']);
       }
-    }   
+    }
   } // end foreach $bookings
 
   sql_mutex_unlock("$tbl_entry");
-      
+
   $result['new_details'] = $new_details;
   $result['slots'] = intval(($common['end_time'] - $common['start_time'])/$resolution);
 
-  return $result;
+    return $result;
 }
 
 function getBooking($id)
@@ -1959,3 +1963,53 @@ function get_bookings_in_series($repeat_id)
   return $bookings;
 }
 
+/*function sql_mysqli_mutex_lock($name, $db_conn = null)
+{
+  global $sql_mutex_unlock_name;
+
+  sql_mysqli_ensure_handle($db_conn);
+
+  // GET_LOCK returns 1 if the lock was obtained successfully, 0 if the attempt
+  // timed out (for example, because another client has previously locked the name),
+  // or NULL if an error occurred (such as running out of memory or the thread was
+  // killed with mysqladmin kill)
+  $r = $db_conn->query("SELECT GET_LOCK('times', 2s)");
+  $sql_mutex_unlock_name = "fail";
+  if ($r === FALSE)
+  {
+    $sql_mutex_unlock_name = "section 1";
+    trigger_error($db_conn->error, E_USER_WARNING);
+    return FALSE;
+  }
+
+  if (($r->num_rows != 1) ||
+      ($r->field_count != 1) ||
+      (($row = $r->fetch_row()) === NULL))
+  {
+    $sql_mutex_unlock_name = "section2";
+    return FALSE;
+  }
+  else
+  {
+    $result = $row[0];
+    $sql_mutex_unlock_name = $result;
+  }
+
+  if ($result == 1)
+  {
+    $sql_mutex_unlock_name = $name;
+  }
+  $r->free();
+  return $result;
+}
+
+
+// Release a mutual-exclusion lock on the named table. See sql_mutex_unlock.
+function sql_mysqli_mutex_unlock($name, $db_conn = null)
+{
+  sql_mysqli_ensure_handle($db_conn);
+
+  global $sql_mysqli_mutex_unlock_name;
+  sql_mysqli_query1("SELECT RELEASE_LOCK('$name')", $db_conn);
+  $sql_mysqli_mutex_unlock_name = NULL;
+}*/

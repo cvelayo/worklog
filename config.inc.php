@@ -135,3 +135,5 @@ $mrbs_company_more_info = "Counseling and Psychiatric Services";  // e.g. "XYZ D
 // notifications, to ensure that the correct URL is displayed in the
 // notification.
 $url_base = "";
+
+$show_plus_link = TRUE;

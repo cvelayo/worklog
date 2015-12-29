@@ -50,13 +50,13 @@
 
 require "defaultincludes.inc";
 require_once "mrbs_sql.inc";
-//require "connection.php";
 
 $fields = sql_field_info($tbl_entry);
 $custom_fields = array();
 
 // Fill $edit_entry_field_order with not yet specified entries.
-$entry_fields = array('type', 'start_date', 'end_date', 'number');
+$entry_fields = array('name', 'description', 'start_date', 'end_date', 'areas',
+                      'rooms', 'type', 'confirmation_status', 'privacy_status');
                       
 foreach ($entry_fields as $field)
 {
@@ -461,7 +461,7 @@ function create_field_entry_rooms($disabled=FALSE)
 function create_field_entry_type($disabled=FALSE)
 {
   global $booking_types, $type;
-  global $sql_mysqli_conn;
+  
   echo "<div id=\"div_type\">\n";
   
   $params = array('label'       => get_vocab("type") . ":",
@@ -470,20 +470,14 @@ function create_field_entry_type($disabled=FALSE)
                   'options'     => array(),
                   'force_assoc' => TRUE,  // in case the type keys happen to be digits
                   'value'       => $type);
-  $sql = "SELECT code,description FROM codes";
-  $res = $sql_mysqli_conn -> query($sql);
-
-/*  foreach ($res as $key)
+                  
+  foreach ($booking_types as $key)
   {
-    $params['options'][$key] = $key;
-  }*/
-  while($row = $res -> fetch_assoc())
-  {
-    $params['options'][$row['code']] = $row['description'];
+    $params['options'][$key] = get_type_vocab($key);
   }
   
   generate_select($params);
-  $res -> free();
+  
   echo "</div>\n";
 }
 
@@ -617,7 +611,6 @@ $end_date = get_form_var('end_date', 'string');
 
 // Also need to know whether they have admin rights
 //$user = getUserName();
-$user = $_GET['user'];
 //$is_admin = (authGetUserLevel($user) >= 2);
 // You're only allowed to make repeat bookings if you're an admin
 // or else if $auth['only_admin_can_book_repeat'] is not set
@@ -982,13 +975,15 @@ $start_min   = strftime('%M', $start_time);
 // this page has been accessed directly and no arguments have
 // been passed to it.
 // If we have not been provided with a room_id
-if (empty( $user ) )
+if (empty( $room_id ) )
 {
-  $redirect_str = "temp.php";
-  header("Location: $redirect_str");
+  $sql = "SELECT id FROM $tbl_room WHERE disabled=0 LIMIT 1";
+  $res = sql_query($sql);
+  $row = sql_row_keyed($res, 0);
+  $room_id = $row['id'];
 }
 
-/*// Determine the area id of the room in question first
+// Determine the area id of the room in question first
 $area_id = mrbsGetRoomArea($room_id);
 
 
@@ -998,19 +993,19 @@ if (!isset($rep_num_weeks))
   $rep_num_weeks = "";
 }
 
-$enable_periods ? toPeriodString($start_min, $duration, $dur_units) : toTimeString($duration, $dur_units);*/
+$enable_periods ? toPeriodString($start_min, $duration, $dur_units) : toTimeString($duration, $dur_units);
 
 //now that we know all the data to fill the form with we start drawing it
 
-/*if (!getWritable($create_by, $user, $room_id))
+if (!getWritable($create_by, $user, $room_id))
 {
   showAccessDenied($day, $month, $year, $area, isset($room) ? $room : "");
   exit;
-}*/
+}
 
 print_header($day, $month, $year, $area, isset($room) ? $room : "");
 
-/*// Get the details of all the enabled rooms
+// Get the details of all the enabled rooms
 $rooms = array();
 $sql = "SELECT R.id, R.room_name, R.area_id
           FROM $tbl_room R, $tbl_area A
@@ -1083,7 +1078,7 @@ if ($res)
     // Now assign the row to the area      
     $areas[$row['id']] = $row;
   }
-}*/
+}
 
 
 if (isset($id) && !isset($copy))
@@ -1128,10 +1123,13 @@ foreach ($edit_entry_field_order as $key)
 {
   switch( $key )
   {
+  case 'name':
+    create_field_entry_name();
+    break;
 
-    case 'type':
-      create_field_entry_type();
-      break;
+  case 'description':
+    create_field_entry_description();
+    break;
 
   case 'start_date':
     create_field_entry_start_date();
@@ -1148,6 +1146,10 @@ foreach ($edit_entry_field_order as $key)
   /*case 'rooms':
     create_field_entry_rooms();
     break;*/
+
+  case 'type':
+    create_field_entry_type();
+    break;
 
   /*case 'confirmation_status':
     create_field_entry_confirmation_status();
@@ -1334,9 +1336,9 @@ if (($edit_type == "series") && $repeats_allowed)
     
     ?>
     <input type="hidden" name="returl" value="<?php echo htmlspecialchars($returl) ?>">
+    <input type="hidden" name="create_by" value="<?php echo htmlspecialchars($create_by)?>">
     <input type="hidden" name="rep_id" value="<?php echo $rep_id?>">
     <input type="hidden" name="edit_type" value="<?php echo $edit_type?>">
-    <input type="hidden" name="user" value="<?php echo $user?>">
     <?php
     // The original_room_id will only be set if this was an existing booking.
     // If it is an existing booking then edit_entry_handler needs to know the
