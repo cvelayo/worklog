@@ -86,6 +86,7 @@ function generateTextArea($form_action, $id, $series, $action_type, $returl, $su
   echo "<legend></legend>\n";
   echo "<textarea name=\"note\">" . htmlspecialchars($value) . "</textarea>\n";
   echo "<input type=\"hidden\" name=\"id\" value=\"$id\">\n";
+  echo "<input type=\"hidden\" name=\"user\" value=\"$user\">\n";
   echo "<input type=\"hidden\" name=\"series\" value=\"$series\">\n";
   echo "<input type=\"hidden\" name=\"returl\" value=\"$returl\">\n";
   echo "<input type=\"hidden\" name=\"action\" value=\"$action_type\">\n";
@@ -102,12 +103,13 @@ function generateTextArea($form_action, $id, $series, $action_type, $returl, $su
 // If $series is TRUE, it means that the $id is the id of an 
 // entry in the repeat table.  Otherwise it's from the entry table.
 $id = get_form_var('id', 'int');
+$user = get_form_var('user', 'string');
 $series = get_form_var('series', 'int');
 $action = get_form_var('action', 'string');
 $returl = get_form_var('returl', 'string');
 $error = get_form_var('error', 'string');
 
-// Check the user is authorised for this page
+/*// Check the user is authorised for this page
 checkAuthorised();
 
 // Also need to know whether they have admin rights
@@ -115,27 +117,27 @@ $user = getUserName();
 $is_admin = (authGetUserLevel($user) >= 2);
 // You're only allowed to make repeat bookings if you're an admin
 // or else if $auth['only_admin_can_book_repeat'] is not set
-$repeats_allowed = $is_admin || empty($auth['only_admin_can_book_repeat']);
+$repeats_allowed = $is_admin || empty($auth['only_admin_can_book_repeat']);*/
 
 $row = get_booking_info($id, $series);
 
-$room = $row['room_id'];
-$area = $row['area_id'];
+/*$room = $row['room_id'];
+$area = $row['area_id'];*/
 
 // Get the area settings for the entry's area.   In particular we want
 // to know how to display private/public bookings in this area.
-get_area_settings($row['area_id']);
+//get_area_settings($row['area_id']);
 
 // Work out whether the room or area is disabled
-$room_disabled = $row['room_disabled'] || $row['area_disabled'];
+//$room_disabled = $row['room_disabled'] || $row['area_disabled'];
 // Get the status
 $status = $row['status'];
 // Get the creator
-$create_by = $row['create_by'];
+//$create_by = $row['create_by'];
 // Work out whether this event should be kept private
-$private = $row['status'] & STATUS_PRIVATE;
+/*$private = $row['status'] & STATUS_PRIVATE;
 $writeable = getWritable($row['create_by'], $user, $row['room_id']);
-$keep_private = (is_private_event($private) && !$writeable);
+$keep_private = (is_private_event($private) && !$writeable);*/
 
 // Work out when the last reminder was sent
 $last_reminded = (empty($row['reminded'])) ? $row['last_updated'] : $row['reminded'];
@@ -263,16 +265,16 @@ if (!isset($returl))
   {
     switch ($default_view)
     {
-      case "month":
+/*      case "month":
         $returl = "month.php";
         break;
       case "week":
         $returl = "week.php";
-        break;
+        break;*/
       default:
-        $returl = "day.php";
+        $returl = "temp.php";
     }
-    $returl .= "?year=$year&month=$month&day=$day&area=$area";
+    $returl .= "?user=$user&year=$year&month=$month&day=$day&area=$area";
   }
 }
 $link_returl = urlencode($returl);  // for use in links
@@ -399,7 +401,7 @@ echo create_details_body($row, TRUE, $keep_private, $room_disabled);
     echo "<div>\n";
     if (!$series)
     {
-      echo "<a href=\"edit_entry.php?id=$id&amp;returl=$link_returl\">". get_vocab("editentry") ."</a>";
+      echo "<a href=\"edit_entry.php?id=$id&amp;user=$user&amp;returl=$link_returl\">". get_vocab("editentry") ."</a>";
     } 
     if (!empty($repeat_id)  && !$series && $repeats_allowed)
     {
@@ -407,7 +409,7 @@ echo create_details_body($row, TRUE, $keep_private, $room_disabled);
     }  
     if ((!empty($repeat_id) || $series) && $repeats_allowed)
     {
-      echo "<a href=\"edit_entry.php?id=$id&amp;edit_type=series&amp;day=$day&amp;month=$month&amp;year=$year&amp;returl=$link_returl\">".get_vocab("editseries")."</a>";
+      echo "<a href=\"edit_entry.php?id=$id&amp;user=$users&amp;edit_type=series&amp;day=$day&amp;month=$month&amp;year=$year&amp;returl=$link_returl\">".get_vocab("editseries")."</a>";
     }
     echo "</div>\n";
     

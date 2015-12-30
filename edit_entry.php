@@ -286,7 +286,6 @@ function create_field_entry_start_date($disabled=FALSE)
   
   $date = getbookingdate($start_time);
   $current_s = (($date['hours'] * 60) + $date['minutes']) * 60;
-
   echo "<div id=\"div_start_date\">\n";
   echo "<label>" . get_vocab("start") . ":</label>\n";
   echo "<div>\n"; // Needed so that the structure is the same as for the end date to help the JavaScript
@@ -704,17 +703,17 @@ if (isset($id))
   
   // We've possibly got a new room and area, so we need to update the settings
   // for this area.
-  $area = get_area($row['room_id']);
-  get_area_settings($area);
+/*  $area = get_area($row['room_id']);
+  get_area_settings($area);*/
   
-  $private = $row['status'] & STATUS_PRIVATE;
+/*  $private = $row['status'] & STATUS_PRIVATE;
   if ($private_mandatory) 
   {
     $private = $private_default;
-  }
+  }*/
   // Need to clear some data if entry is private and user
   // does not have permission to edit/view details
-  if (isset($copy) && ($user != $row['create_by'])) 
+  /*if (isset($copy) && ($user != $row['create_by']))
   {
     // Entry being copied by different user
     // If they don't have rights to view details, clear them
@@ -724,13 +723,13 @@ if (isset($id))
   else
   {
     $keep_private = FALSE;
-  }
-  
+  }*/
+
   // default settings
   $rep_day = array();
   $rep_type = REP_NONE;
   $rep_num_weeks = 1;
-  
+
   foreach ($row as $column => $value)
   {
     switch ($column)

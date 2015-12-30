@@ -23,6 +23,7 @@ function create_details_row($label, $value, $as_html=FALSE, $class='')
     // Some of the vocab strings contain &nbsp;
     $result .= str_replace('&nbsp;', ' ', $label) . ": $value\n";
   }
+
   return $result;
 }
 
@@ -41,7 +42,7 @@ function create_details_body($data, $as_html=FALSE, $keep_private=FALSE, $room_d
   global $strftime_format;
   global $tbl_entry;
   global $select_options;
-  
+  $tbl_entry = times;
   // Get the duration if we haven't got it already
   if (!isset($data['duration']))
   {
@@ -98,7 +99,7 @@ function create_details_body($data, $as_html=FALSE, $keep_private=FALSE, $room_d
   $tbody = '';
   $tbody .= ($as_html) ? "<tbody>\n" : "";
   // Description
-  $class = ($keep_private & !empty($is_private_field['entry.description'])) ? "private" : "";
+  /*$class = ($keep_private & !empty($is_private_field['entry.description'])) ? "private" : "";
   $tbody .= create_details_row(get_vocab("description"), $data['description'], $as_html, $class);
   // Confirmation status
   if ($confirmation_enabled)
@@ -118,7 +119,7 @@ function create_details_body($data, $as_html=FALSE, $keep_private=FALSE, $room_d
   {
     $value .= " (" . get_vocab("disabled") . ")";
   }
-  $tbody .= create_details_row(get_vocab("room"), $value, $as_html);
+  $tbody .= create_details_row(get_vocab("room"), $value, $as_html);*/
   // Start date
   if ($enable_periods)
   {
@@ -142,17 +143,17 @@ function create_details_body($data, $as_html=FALSE, $keep_private=FALSE, $room_d
   }
   $tbody .= create_details_row(get_vocab("end_date"), $end_date, $as_html);
   // Type
-  $type = get_type_vocab($data['type']);
-  $value = (empty($type)) ? "?${data['type']}?" : $type;
+  //$type = get_type_vocab($data['type']);
+  $value = (empty($type)) ? "${data['type']}" : $type;
   $tbody .= create_details_row(get_vocab("type"), $value, $as_html);
-  // Created by
+  /*// Created by
   $class = ($keep_private && !empty($is_private_field['entry.create_by'])) ? "private" : "";
   $tbody .= create_details_row(get_vocab("createdby"), $data['create_by'], $as_html, $class);
   // Modified by
   $class = ($keep_private && !empty($is_private_field['entry.modified_by'])) ? "private" : "";
   $tbody .= create_details_row(get_vocab("modifiedby"), $data['modified_by'], $as_html, $class);
   // Last updated
-  $tbody .= create_details_row(get_vocab("lastupdate"), time_date_string($data['last_updated']), $as_html);
+  $tbody .= create_details_row(get_vocab("lastupdate"), time_date_string($data['last_updated']), $as_html);*/
   // The custom fields
   $fields = sql_field_info($tbl_entry);
   foreach ($fields as $field)
@@ -161,6 +162,10 @@ function create_details_body($data, $as_html=FALSE, $keep_private=FALSE, $room_d
     if (!in_array($key, $standard_fields['entry']))
     {
       $label = get_loc_field_name($tbl_entry, $key);
+      if ($label == 'number')
+      {$label = 'Number of appointments';}
+      elseif ($label == 'user')
+      {$label = "User";}
       // Output a yes/no if it's a boolean or integer <= 2 bytes (which we will
       // assume are intended to be booleans)
       if (($field['nature'] == 'boolean') || 

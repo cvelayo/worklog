@@ -1222,7 +1222,7 @@ echo "<div id=\"dwm_header\" class=\"screenonly\">\n";
 echo make_area_select_html('temp.php', $user, $year, $month, $day);
 if (!$display_calendar_bottom)
 {
-    minicals($year, $month, $day, $area, $room, 'week');
+    minicals($year, $month, $day, $area, $room, 'temp', $user);
 }
 
 echo "</div>\n";
@@ -1295,7 +1295,7 @@ $result = $sql_mysqli_conn -> query($sql);
 // Draw the three month calendars
     if ($display_calendar_bottom)
     {
-        minicals($year, $month, $day, $area, $room, 'week');
+        minicals($year, $month, $day, $area, $room, 'temp', $user);
     }
 
     output_trailer();

@@ -119,14 +119,13 @@ if (!empty($back_button))
 }
 
 // Get custom form variables
-//$custom_fields = array();
+$custom_fields = array();
 
-/*// Get the information about the fields in the entry table
+// Get the information about the fields in the entry table
 $fields = sql_field_info(times);
 
 foreach($fields as $field)
 {
-  echo $field;
   if (!in_array($field['name'], $standard_fields['entry']))
   {
     switch($field['nature'])
@@ -143,6 +142,8 @@ foreach($fields as $field)
         break;
     }
     $var = VAR_PREFIX . $field['name'];
+    if ($field['name']=='user')
+    {$var = $field['name'];}
     $custom_fields[$field['name']] = get_form_var($var, $f_type);
     if (($f_type == 'int') && ($custom_fields[$field['name']] === ''))
     {
@@ -155,7 +156,7 @@ foreach($fields as $field)
     }
   }
 }
-*/
+
 
 
 // (3) Clean up the form variables
@@ -628,7 +629,7 @@ $bookings = array();
 $booking = array();
 $booking['type'] = $type;
 $booking['user'] = $user;
-$booking['f_number'] = $f_number;
+$booking['number'] = $number;
 $booking['start_time'] = $start_time;
 $booking['end_time'] = $end_time;
 $booking['rep_type'] = $rep_type;
@@ -691,7 +692,10 @@ $result = mrbsMakeBookings($bookings, $this_id, $just_check, $skip, $original_ro
 // we were editing an existing booking, then delete the old booking
 if (!$just_check && $result['valid_booking'] && isset($id))
 {
+  echo "test";
   mrbsDelEntry($user, $id, ($edit_type == "series"), 1);
+  //print_r(array_values($test));*/
+  //echo sql_command("DELETE FROM $tbl_entry WHERE id=" . $id);
 }
 
 // If this is an Ajax request, output the result and finish

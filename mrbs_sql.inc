@@ -43,7 +43,6 @@ function mrbsCheckFree(&$booking, $ignore, $repignore)
     $sql .= " AND repeat_id <> $repignore";
   }
   $sql .= " ORDER BY start_time";
-  echo $sql;
   global $sql_mysqli_conn;
   $res = $sql_mysqli_conn -> query($sql);
   if (! $res)
@@ -445,20 +444,19 @@ function mrbsCheckPolicy(&$booking, $ignore, $repignore, $delete=FALSE)
 function mrbsDelEntry($user, $id, $series, $all)
 {
   global $tbl_entry, $tbl_repeat;
-
+  $tbl_entry = 'times';
+  $tbl_repeat = 'repeats';
   $start_times = array();
 
   // Get the repeat_id and room_id for this entry
-  $res = sql_query("SELECT repeat_id, room_id FROM $tbl_entry WHERE id=$id LIMIT 1");
+  $res = sql_query("SELECT repeat_id, user FROM $tbl_entry WHERE id=$id LIMIT 1");
   if (($res === FALSE) || (sql_count($res) <= 0))
   {
     return FALSE;
   }
   $row = sql_row_keyed($res, 0);
   $repeat_id = $row['repeat_id'];
-  $room_id = $row['room_id'];
-
-  $sql = "SELECT start_time, end_time, room_id, create_by, id, entry_type FROM $tbl_entry WHERE ";
+  $sql = "SELECT start_time, end_time, id, type FROM $tbl_entry WHERE ";
 
   if ($series)
   {
@@ -468,12 +466,11 @@ function mrbsDelEntry($user, $id, $series, $all)
   {
     $sql .= "id=$id";
   }
-
   $res = sql_query($sql);
 
   for ($i = 0; ($row = sql_row_keyed($res, $i)); $i++)
   {
-    if(!getWritable($row['create_by'], $user, $room_id))
+/*    if(!getWritable($row['create_by'], $user, $room_id))
     {
       continue;
     }
@@ -481,16 +478,15 @@ function mrbsDelEntry($user, $id, $series, $all)
     if ($series && $row['entry_type'] == ENTRY_RPT_CHANGED && !$all)
     {
       continue;
-    }
+    }*/
 
     // check that the booking policies allow us to delete this entry
-    $tmp = mrbsCheckPolicy($row, 0, 0, TRUE);
+    /*$tmp = mrbsCheckPolicy($row, 0, 0, TRUE);
     if (!empty($tmp))
     {
       continue;
-    }
-
-    if (sql_command("DELETE FROM $tbl_entry WHERE id=" . $row['id']) > 0)
+    }*/
+    if (sql_command("DELETE FROM $tbl_entry WHERE id=" . $id) > 0)
     {
       $start_times[] = $row['start_time'];
     }
@@ -528,7 +524,6 @@ function mrbsCreateEntry($table, $data)
   $table_no_prefix = utf8_substr($table, utf8_strlen($db_tbl_prefix));  // strip the prefix off the table name
 
   $fields = sql_field_info($table);
-
   foreach ($fields as $field)
   {
     $key = $field['name'];
@@ -628,7 +623,6 @@ function mrbsCreateEntry($table, $data)
 
   $sql_col = array_map('sql_quote', $sql_col);
   $sql = "INSERT INTO $table (" . implode(', ', $sql_col) . ") VALUES (" . implode(', ',$sql_val) . ")";
-
   if (sql_command($sql) < 0)
   {
     // probably because the table hasn't been created properly
@@ -687,7 +681,7 @@ function mrbsCreateSingleEntry($data)
 function mrbsCreateRepeatEntry($data)
 {
   global $tbl_repeat;
-
+  $tbl_repeat = 'repeats';
   $result = mrbsCreateEntry($tbl_repeat, $data);
   return $result;
 }
@@ -1151,7 +1145,8 @@ function mrbsApproveEntry($id, $series)
 function get_booking_info($id, $series, $silent=FALSE)
 {
   global $tbl_entry, $tbl_repeat, $tbl_room, $tbl_area;
-
+  $tbl_entry = 'times';
+  $tbl_repeat= 'repeats';
   // Check that we've got an id
   if (!isset($id))
   {
@@ -1168,7 +1163,6 @@ function get_booking_info($id, $series, $silent=FALSE)
 
   $table = ($series) ? $tbl_repeat : $tbl_entry;
   $table_fields = sql_field_info($table);
-
   // Build an array of the field names in the repeat table so that
   // we'll be able to do some sanity checking later
   $repeat_fields = sql_field_info($tbl_repeat);
@@ -1178,15 +1172,7 @@ function get_booking_info($id, $series, $silent=FALSE)
     $rep_fields[$field['name']] = 1;
   }
 
-  $terms = array("M.room_name",
-                 "M.room_admin_email",
-                 "M.area_id",
-                 "A.area_name",
-                 "A.area_admin_email",
-                 "M.disabled AS room_disabled",
-                 "A.disabled AS area_disabled",
-                 "A.enable_periods",
-                 "(end_time - start_time) AS duration");
+  $terms = array("(end_time - start_time) AS duration");
 
   foreach ($table_fields as $field)
   {
@@ -1208,11 +1194,11 @@ function get_booking_info($id, $series, $silent=FALSE)
       case 'info_text':
         if ($series)
         {
-          array_push($terms, $field['name'] . " AS repeat_".$field['name']);
+          array_push($terms, $field['name']);
         }
         else
         {
-          array_push($terms, $field['name'] . " AS entry_".$field['name']);
+          array_push($terms, $field['name']);
         }
         break;
 
@@ -1227,17 +1213,13 @@ function get_booking_info($id, $series, $silent=FALSE)
           fatal_error(0, "Custom fields problem, '".$field['name']."' exists in entry table but not in repeat table");
         }
 
-        array_push($terms, "T." . $field['name']);
+        array_push($terms, $field['name']);
         break;
     }
   }
-
   $sql = "SELECT " . implode(", ",$terms)."
-            FROM $table T, $tbl_room M, $tbl_area A
-           WHERE T.room_id = M.id
-             AND M.area_id = A.id
-             AND T.id=$id";
-
+            FROM $table
+             WHERE id=$id";
   $res = sql_query($sql);
   if (! $res)
   {
@@ -1275,7 +1257,6 @@ function get_booking_info($id, $series, $silent=FALSE)
   $d = get_duration($row['start_time'], $row['end_time'], $row['enable_periods'], FALSE);
   $row['duration'] = $d['duration'];
   $row['dur_units'] = $d['dur_units'];
-
   // Get some extra information
   if ($series)
   {
@@ -1600,7 +1581,6 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
   // (We do this before we adjust for DST so that the user sees what they expect to see)
   $duration = $duration_seconds;
   $date = getdate($common['start_time']);
-  echo $date;
   if ($enable_periods)
   {
     $period = (($date['hours'] - 12) * 60) + $date['minutes'];
@@ -1855,8 +1835,6 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
     else
     {
       // Create the entry:
-      echo "Here is the error";
-
       $new_id = mrbsCreateSingleEntry($booking);
       $is_repeat_table = FALSE;
       $result['start_times'] = array($booking['start_time']);
@@ -1915,7 +1893,7 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
   $result['new_details'] = $new_details;
   $result['slots'] = intval(($common['end_time'] - $common['start_time'])/$resolution);
 
-    return $result;
+  return $result;
 }
 
 function getBooking($id)

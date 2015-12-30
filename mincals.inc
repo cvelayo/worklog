@@ -1,7 +1,7 @@
 <?php
 // $Id$
 
-function minicals($year, $month, $day, $area, $room, $dmy) {
+function minicals($year, $month, $day, $area, $room, $dmy, $user) {
 
 // PHP Calendar Class
 //  
@@ -27,8 +27,9 @@ class Calendar
   private $area;
   private $room;
   private $dmy;
+  private $user;
     
-  public function __construct($day, $month, $year, $h, $area, $room, $dmy)
+  public function __construct($day, $month, $year, $h, $area, $room, $dmy, $user)
   {
       $this->day   = $day;
       $this->month = $month;
@@ -37,6 +38,7 @@ class Calendar
       $this->area  = $area;
       $this->room  = $room;
       $this->dmy   = $dmy;
+      $this->user  = $user;
   }
    
   public function getHTML()
@@ -103,7 +105,8 @@ class Calendar
     {
       $link_day--;
     }
-    $link = $this->getDateLink($link_day, $this->month, $this->year, 'month');
+    $link = $this->getDateLink($link_day, $this->month, $this->year, 'temp');
+    $link .= "&amp;user=" . $this->user;
     $s .= "<a href=\"$link\">$monthName&nbsp;$this->year</a>";
     $s .= "</th>\n"; 
     $s .= "</tr>\n";
@@ -129,7 +132,7 @@ class Calendar
       if ($mincals_week_numbers)
       {
           $s .= "<td class=\"mincals_week_number\">";
-          $link = $this->getDateLink($d, $this->month, $this->year, 'week');
+          $link = $this->getDateLink($d, $this->month, $this->year, 'temp');
           $s .= "<a href=\"$link\">";
           $s .= date("W",gmmktime (12, 0, 0, $this->month, $d, $this->year));
           $s .= "</a>";
@@ -156,7 +159,7 @@ class Calendar
         if ($d > 0 && $d <= $daysInMonth)   // valid days of the month
         {
           $link = $this->getDateLink($d, $this->month, $this->year);
-
+          $link .= "&amp;user=" . $this->user;
           if ($link == "")
           {
             $s .= $d;
@@ -241,14 +244,15 @@ class Calendar
   // Takes an optional fourth argument $page (which can be 'day', 'week' or 'month')
   private function getDateLink($day, $month, $year)
   {
-    $page = (func_num_args() > 3) ? func_get_arg(3) : $this->dmy;
+    $page = (func_num_args() > 3) ? func_get_arg(3) : 'temp';
+    $user = $this->user;
     if (empty($this->room))
     {
-      return $page.".php?year=$year&amp;month=$month&amp;day=$day&amp;area=".$this->area;
+      return $page.".php?year=$year&amp;month=$month&amp;day=$day";
     }
     else
     {
-      return $page.".php?year=$year&amp;month=$month&amp;day=$day&amp;area=".$this->area."&amp;room=".$this->room;
+      return $page.".php?year=$year&amp;month=$month&amp;day=$day";
     }
   }
     
@@ -320,17 +324,17 @@ $nextmonth = mktime(12, 0, 0, $month+1, 1, $year);
 echo "<div id=\"cals\" class=\"screenonly\">\n";
 
 echo "<div id=\"cal_last\">\n";
-$cal = new Calendar(date("d",$lastmonth), date("m",$lastmonth), date("Y",$lastmonth), 0, $area, $room, $dmy);
+$cal = new Calendar(date("d",$lastmonth), date("m",$lastmonth), date("Y",$lastmonth), 0, $area, $room, $dmy, $user);
 echo $cal->getHTML();
 echo "</div>\n";
 
 echo "<div id=\"cal_this\">\n";
-$cal = new Calendar(date("d",$thismonth), date("m",$thismonth), date("Y",$thismonth), 1, $area, $room, $dmy);
+$cal = new Calendar(date("d",$thismonth), date("m",$thismonth), date("Y",$thismonth), 1, $area, $room, $dmy, $user);
 echo $cal->getHTML();
 echo "</div>\n";
 
 echo "<div id=\"cal_next\">\n";
-$cal = new Calendar(date("d",$nextmonth), date("m",$nextmonth), date("Y",$nextmonth), 0, $area, $room, $dmy);
+$cal = new Calendar(date("d",$nextmonth), date("m",$nextmonth), date("Y",$nextmonth), 0, $area, $room, $dmy, $user);
 echo $cal->getHTML();
 echo "</div>\n";
 
