@@ -1234,13 +1234,14 @@ $result = $sql_mysqli_conn -> query($sql);
 
     while($row = $result->fetch_assoc()){
         $team = $row['team'];
+        if ($team != 'test'){
         echo '<h2>' . $team . '</h2>';
         $sql2 = "SELECT * FROM users WHERE team ='" . $team . "' ORDER BY name  ";
 
         $result2 = $sql_mysqli_conn -> query($sql2);
         while ($row2 = $result2->fetch_assoc()) {
             echo '<a href="temp.php?user=' . $row2['code'] . '">' . $row2['name'] . '</a><br />';
-        }
+        }}
     }
     $result -> free();
     $result2 -> free();

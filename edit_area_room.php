@@ -353,6 +353,7 @@ function create_field_entry_max_duration()
 
 
 // Get non-standard form variables
+$user = get_form_var('user', 'int');
 $phase = get_form_var('phase', 'int');
 $new_area = get_form_var('new_area', 'int');
 $old_area = get_form_var('old_area', 'int');
@@ -418,7 +419,7 @@ foreach ($interval_types as $interval_type)
 
 // Get the information about the fields in the room table
 $fields = sql_field_info($tbl_room);
-
+$user = $_GET['user'];
 // Get any user defined form variables
 foreach($fields as $field)
 {
@@ -443,13 +444,13 @@ foreach($fields as $field)
   }
 }
 
-// Check the user is authorised for this page
+/*// Check the user is authorised for this page
 checkAuthorised();
 
 // Also need to know whether they have admin rights
 $user = getUserName();
 $required_level = (isset($max_level) ? $max_level : 2);
-$is_admin = (authGetUserLevel($user) >= $required_level);
+$is_admin = (authGetUserLevel($user) >= $required_level);*/
 
 // Done changing area or room information?
 if (isset($change_done))
@@ -477,6 +478,7 @@ if ($phase == 2)
 {
   // Unauthorised users shouldn't normally be able to reach Phase 2, but just in case
   // they have, check again that they are allowed to be here
+  $is_admin = 1;
   if (isset($change_room) || isset($change_area))
   {
     if (!$is_admin)
@@ -490,28 +492,36 @@ if ($phase == 2)
 
   // PHASE 2 (ROOM) - UPDATE THE DATABASE
   // ------------------------------------
-  if (isset($change_room) && !empty($room))
+  $description = $_POST['description'];
+$f2f = $_POST['f2f'];
+$code = $_POST['code'];
+$available = $_POST['available'];
+$outreach = $_POST['outreach'];
+$dnka = $_POST['dnka'];
+$disabled = $_POST['disabled'];
+$id = $_POST['id'];
+  if (isset($change_room) && !empty($code))
   {
-    // clean up the address list replacing newlines by commas and removing duplicates
+/*    // clean up the address list replacing newlines by commas and removing duplicates
     $room_admin_email = clean_address_list($room_admin_email);
     // put a space after each comma so that the list displays better
     $room_admin_email = str_replace(',', ', ', $room_admin_email);
     // validate the email addresses
-    $valid_email = validate_email_list($room_admin_email);
+    $valid_email = validate_email_list($room_admin_email);*/
   
     if (FALSE != $valid_email)
     {
-      if (empty($capacity))
+/*      if (empty($capacity))
       {
         $capacity = 0;
-      }
+      }*/
     
       // Acquire a mutex to lock out others who might be deleting the new area
-      if (!sql_mutex_lock("$tbl_area"))
+      if (!sql_mutex_lock("codes"))
       {
         fatal_error(TRUE, get_vocab("failed_to_acquire"));
       }
-      // Check the new area still exists
+/*      // Check the new area still exists
       if (sql_query1("SELECT COUNT(*) FROM $tbl_area WHERE id=$new_area LIMIT 1") < 1)
       {
         $valid_area = FALSE;
@@ -529,14 +539,14 @@ if ($phase == 2)
                               LIMIT 1") > 0)
       {
         $valid_room_name = FALSE;
-      }
+      }*/
       // If everything is still OK, update the databasae
       else
       {
         // Convert booleans into 0/1 (necessary for PostgreSQL)
-        $room_disabled = (!empty($room_disabled)) ? 1 : 0;
-        $sql = "UPDATE $tbl_room SET ";
-        $n_fields = count($fields);
+/*        $room_disabled = (!empty($room_disabled)) ? 1 : 0;
+        $sql = "UPDATE $tbl_room SET ";*/
+/*        $n_fields = count($fields);
         $assign_array = array();
         foreach ($fields as $field)
         {
@@ -593,7 +603,10 @@ if ($phase == 2)
           }
         }
         
-        $sql .= implode(",", $assign_array) . " WHERE id=$room";
+        $sql .= implode(",", $assign_array) . " WHERE id=$room";*/
+        $sql = "UPDATE codes
+                SET code = '$code', description = '$description', f2f= '$f2f', disabled = '$disabled', outreach='$outreach', available = '$available', dnka = '$dnka'
+                WHERE id = $id";
         if (sql_command($sql) < 0)
         {
           echo get_vocab("update_room_failed") . "<br>\n";
@@ -602,30 +615,38 @@ if ($phase == 2)
         }
         // if everything is OK, release the mutex and go back to
         // the admin page (for the new area)
-        sql_mutex_unlock("$tbl_area");
-        Header("Location: admin.php?day=$day&month=$month&year=$year&area=$new_area");
+        sql_mutex_unlock("codes");
+
+        Header("Location: admin.php?day=$day&month=$month&year=$year&success=1");
         exit();
       }
     
       // Release the mutex
-      sql_mutex_unlock("$tbl_area");
+      sql_mutex_unlock("codes");
     }
   }
 
   // PHASE 2 (AREA) - UPDATE THE DATABASE
   // ------------------------------------
+$user = $_POST['user'];
+$name = $_POST['name'];
+$code = $_POST['code'];
+$team = $_POST['team'];
+$role = $_POST['role'];
+$disabled = $_POST['disabled'];
+$id = $_POST['id'];
 
-  if (isset($change_area) && !empty($area))
+  if (isset($change_area) && !empty($user))
   { 
-    // clean up the address list replacing newlines by commas and removing duplicates
+   /* // clean up the address list replacing newlines by commas and removing duplicates
     $area_admin_email = clean_address_list($area_admin_email);
     // put a space after each comma so that the list displays better
     $area_admin_email = str_replace(',', ', ', $area_admin_email);
     // validate email addresses
     $valid_email = validate_email_list($area_admin_email);
-  
+  */
     // Tidy up the input from the form
-    if (isset($area_eveningends_t))
+    /*if (isset($area_eveningends_t))
     {
       // if we've been given a time in minutes rather than hours and minutes, convert it
       // (this will happen if JavaScript is enabled)
@@ -682,8 +703,8 @@ if ($phase == 2)
         }
       }
     }
-  
-    // Convert booleans into 0/1 (necessary for PostgreSQL)
+  */
+/*    // Convert booleans into 0/1 (necessary for PostgreSQL)
     $vars = array('area_disabled',
                   'area_def_duration_all_day',
                   'area_min_create_ahead_enabled',
@@ -744,13 +765,17 @@ if ($phase == 2)
           $enough_slots = FALSE;
         }
       }
-    }
+    }*/
     
     // If everything is OK, update the database
     if ((FALSE != $valid_email) && (FALSE != $valid_resolution) && (FALSE != $enough_slots))
     {
-      $sql = "UPDATE $tbl_area SET ";
-      $assign_array = array();
+      $sql = "UPDATE users SET name = '$name', code = '$code', team = '$team', role = '$role', disabled = '$disabled' WHERE id = $user";
+      /*
+
+      $assign_array[] = "reminders_enabled=" . $area_reminders_enabled;
+      $assign_array[] = "enable_periods=" . $area_enable_periods;
+      $assign_array[] = "confirmation_enabled=" . $area_confirmation_enabled$assign_array = array();
       $assign_array[] = "area_name='" . sql_escape($area_name) . "'";
       $assign_array[] = "disabled=" . $area_disabled;
       $assign_array[] = "timezone='" . sql_escape($area_timezone) . "'";
@@ -766,7 +791,7 @@ if ($phase == 2)
         $assign_array[] = "eveningends=" . $area_eveningends;
         $assign_array[] = "eveningends_minutes=" . $area_eveningends_minutes;
       }
-      
+
       // only update the min and max *_ahead_secs fields if the form values
       // are set;  they might be NULL because they've been disabled by JavaScript
       $assign_array[] = "min_create_ahead_enabled=" . $area_min_create_ahead_enabled;
@@ -796,13 +821,13 @@ if ($phase == 2)
         $assign_array[] = "max_duration_secs=" . $area_max_duration_value;
         $assign_array[] = "max_duration_periods=" . $area_max_duration_periods;
       }
-      
+
       foreach($interval_types as $interval_type)
       {
         $var = "max_per_${interval_type}_enabled";
         $area_var = "area_" . $var;
         $assign_array[] = "$var=" . $$area_var;
-        
+
         $var = "max_per_${interval_type}";
         $area_var = "area_" . $var;
         if (isset($$area_var))
@@ -812,29 +837,26 @@ if ($phase == 2)
           $assign_array[] = "$var=" . $$area_var;
         }
       }
-      
+
       $assign_array[] = "private_enabled=" . $area_private_enabled;
       $assign_array[] = "private_default=" . $area_private_default;
       $assign_array[] = "private_mandatory=" . $area_private_mandatory;
       $assign_array[] = "private_override='" . $area_private_override . "'";
-      $assign_array[] = "approval_enabled=" . $area_approval_enabled;
-      $assign_array[] = "reminders_enabled=" . $area_reminders_enabled;
-      $assign_array[] = "enable_periods=" . $area_enable_periods;
-      $assign_array[] = "confirmation_enabled=" . $area_confirmation_enabled;
+      $assign_array[] = "approval_enabled=" . $area_approval_enabled;;
       $assign_array[] = "confirmed_default=" . $area_confirmed_default;
-            
-      $sql .= implode(",", $assign_array) . " WHERE id=$area";
-      
+            */
+      //$sql .= implode(",", $assign_array) . " WHERE id=$area";
+
       if (sql_command($sql) < 0)
       {
-        echo $sql;
+
         echo sql_error();
         echo get_vocab("update_area_failed") . "<br>\n";
         trigger_error(sql_error(), E_USER_WARNING);
         fatal_error(FALSE, get_vocab("fatal_db_error"));
       }
       // If the database update worked OK, go back to the admin page
-      Header("Location: admin.php?day=$day&month=$month&year=$year&area=$area");
+      Header("Location: admin.php?day=$day&month=$month&year=$year&success=1");
       exit();
     }
   }
@@ -843,8 +865,8 @@ if ($phase == 2)
 // PHASE 1 - GET THE USER INPUT
 // ----------------------------
 
-print_header($day, $month, $year, isset($area) ? $area : "", isset($room) ? $room : "");
-
+print_header($day, $month, $year, $user);
+$is_admin =1;
 if ($is_admin)
 {
   // Heading is confusing for non-admins
@@ -853,11 +875,11 @@ if ($is_admin)
 
 // Non-admins will only be allowed to view room details, not change them
 $disabled = !$is_admin;
-
+$code = $_GET['code'];
 // THE ROOM FORM
-if (isset($change_room) && !empty($room))
+if (isset($change_room) && !empty($code))
 {
-  $res = sql_query("SELECT * FROM $tbl_room WHERE id=$room LIMIT 1");
+  $res = sql_query("SELECT * FROM codes WHERE code='$code' LIMIT 1");
   if (! $res)
   {
     fatal_error(0, get_vocab("error_room") . $room . get_vocab("not_found"));
@@ -890,13 +912,10 @@ if (isset($change_room) && !empty($room))
       <input type="hidden" name="room" value="<?php echo $row["id"]?>">
     
       <?php
-      $areas = get_areas($all=TRUE);
-      if (empty($areas))
-      {
-        fatal_error(FALSE, get_vocab('noareas'));  // should not happen
-      }
+      //$areas = get_areas($all=TRUE);
+
       
-      // The area select box
+      /*// The area select box
       echo "<div>\n";
       $params = array('label'         => get_vocab("area") . ":",
                       'name'          => 'new_area',
@@ -907,20 +926,30 @@ if (isset($change_room) && !empty($room))
                       'create_hidden' => FALSE);
       generate_select($params);
       echo "<input type=\"hidden\" name=\"old_area\" value=\"" . $row['area_id'] . "\">\n";
-      echo "</div>\n";
+      echo "</div>\n";*/
       
       // First of all deal with the standard MRBS fields
       // Room name
       echo "<div>\n";
-      $params = array('label'         => get_vocab("name") . ":",
-                      'name'          => 'room_name',
-                      'value'         => $row['room_name'],
+      $params = array('label'         => get_vocab("code") . ":",
+                      'name'          => 'code',
+                      'value'         => $row['code'],
                       'disabled'      => $disabled,
                       'create_hidden' => FALSE);
       generate_input($params);
       echo "<input type=\"hidden\" name=\"old_room_name\" value=\"" . htmlspecialchars($row["room_name"]) . "\">\n";
       echo "</div>\n";
-      
+
+      // Description
+      echo "<div>\n";
+      $params = array('label'         => get_vocab("description") . ":",
+                      'name'          => 'description',
+                      'value'         => $row['description'],
+                      'disabled'      => $disabled,
+                      'create_hidden' => FALSE);
+      generate_input($params);
+      echo "</div>\n";
+
       // Status (Enabled or Disabled)
       if ($is_admin)
       {
@@ -929,7 +958,7 @@ if (isset($change_room) && !empty($room))
                          '1' => get_vocab("disabled"));
         $params = array('label'         => get_vocab("status") . ":",
                         'label_title'   => get_vocab("disabled_room_note"),
-                        'name'          => 'room_disabled',
+                        'name'          => 'disabled',
                         'value'         => ($row['disabled']) ? '1' : '0',
                         'options'       => $options,
                         'force_assoc'   => TRUE,
@@ -938,8 +967,59 @@ if (isset($change_room) && !empty($room))
         generate_radio_group($params);
         echo "</div>\n";
       }
+      //Face to face time
+      echo "<div id=\"status\">\n";
+      $options = array('0' => get_vocab("no"),
+                   '1' => get_vocab("yes"));
+      $params = array('label'       => get_vocab("f2f") . ":",
+                  'label_title' => get_vocab("Does this count as face to face time?"),
+                  'name'        => 'f2f',
+                  'value'       => ($row['f2f']) ? '1' : '0',
+                  'options'     => $options,
+                  'force_assoc' => TRUE);
+      generate_radio_group($params);
+      echo "</div>\n";
 
-      // Sort key
+      //Available time
+      echo "<div id=\"status\">\n";
+      $options = array('0' => get_vocab("no"),
+                   '1' => get_vocab("yes"));
+      $params = array('label'       => get_vocab("available") . ":",
+                  'label_title' => get_vocab("Does this count as time made available?"),
+                  'name'        => 'available',
+                  'value'       => ($row['available']) ? '1' : '0',
+                  'options'     => $options,
+                  'force_assoc' => TRUE);
+      generate_radio_group($params);
+      echo "</div>\n";
+
+      //DNKA codes
+      echo "<div id=\"status\">\n";
+      $options = array('0' => get_vocab("no"),
+                   '1' => get_vocab("yes"));
+      $params = array('label'       => get_vocab("dnka") . ":",
+                  'label_title' => get_vocab("Does this count as a DNKA code?"),
+                  'name'        => 'dnka',
+                  'value'       => ($row['dnka']) ? '1' : '0',
+                  'options'     => $options,
+                  'force_assoc' => TRUE);
+      generate_radio_group($params);
+      echo "</div>\n";
+
+      //Outreach time
+      echo "<div id=\"status\">\n";
+      $options = array('0' => get_vocab("no"),
+                   '1' => get_vocab("yes"));
+      $params = array('label'       => get_vocab("outreach") . ":",
+                  'label_title' => get_vocab("Does this count as outreach time?"),
+                  'name'        => 'outreach',
+                  'value'       => ($row['outreach']) ? '1' : '0',
+                  'options'     => $options,
+                  'force_assoc' => TRUE);
+      generate_radio_group($params);
+      echo "</div>\n";
+
+/*      // Sort key
       if ($is_admin)
       {
         echo "<div>\n";
@@ -951,19 +1031,9 @@ if (isset($change_room) && !empty($room))
                         'create_hidden' => FALSE);
         generate_input($params);
         echo "</div>\n";
-      }
-
-      // Description
-      echo "<div>\n";
-      $params = array('label'         => get_vocab("description") . ":",
-                      'name'          => 'description',
-                      'value'         => $row['description'],
-                      'disabled'      => $disabled,
-                      'create_hidden' => FALSE);
-      generate_input($params);
-      echo "</div>\n";
+      }*/
       
-      // Capacity
+      /*// Capacity
       echo "<div>\n";
       $params = array('label'         => get_vocab("capacity") . ":",
                       'name'          => 'capacity',
@@ -972,7 +1042,7 @@ if (isset($change_room) && !empty($room))
                       'create_hidden' => FALSE);
       generate_input($params);
       echo "</div>\n";
-      
+
       // Room admin email
       echo "<div>\n";
       $params = array('label'         => get_vocab("room_admin_email") . ":",
@@ -983,9 +1053,9 @@ if (isset($change_room) && !empty($room))
                       'disabled'      => $disabled,
                       'create_hidden' => FALSE);
       generate_textarea($params);
-      echo "</div>\n";
+      echo "</div>\n";*/
       
-      // Custom HTML
+      /*// Custom HTML
       if ($is_admin)
       {
         // Only show the raw HTML to admins.  Non-admins will see the rendered HTML
@@ -999,22 +1069,23 @@ if (isset($change_room) && !empty($room))
                         'create_hidden' => FALSE);
         generate_textarea($params);
         echo "</div>\n";
-      }
+      }*/
     
       // then look at any user defined fields  
-      foreach ($fields as $field)
+      /*foreach ($fields as $field)
       {
         if (!in_array($field['name'], $standard_fields['room']))
         {
           echo "<div>\n";
-          $params = array('label'         => get_loc_field_name($tbl_room, $field['name']) . ":",
-                          'name'          => VAR_PREFIX . $field['name'],
+          $params = array('label'         => get_loc_field_name('codes', $field['name']) . ":",
+                          'name'          => $field['name'],
                           'value'         => $row[$field['name']],
                           'disabled'      => $disabled,
                           'create_hidden' => FALSE);
           // Output a checkbox if it's a boolean or integer <= 2 bytes (which we will
           // assume are intended to be booleans)
-          if (($field['nature'] == 'boolean') || 
+          echo $params['name'];
+          if (($field['nature'] == 'boolean') ||
               (($field['nature'] == 'integer') && isset($field['length']) && ($field['length'] <= 2)) )
           {
             generate_checkbox($params);
@@ -1033,7 +1104,7 @@ if (isset($change_room) && !empty($room))
           }
           echo "</div>\n";
         }
-      }
+      }*/
       echo "</fieldset>\n";
     
       // Submit and Back buttons (Submit only if they're an admin)  
@@ -1044,8 +1115,10 @@ if (isset($change_room) && !empty($room))
       echo "</div>\n";
       if ($is_admin)
       { 
+        $id = $row['id'];
         echo "<div id=\"edit_area_room_submit_save\">\n";
         echo "<input type=\"hidden\" name=\"phase\" value=\"2\">";
+        echo "<input type=\"hidden\" name=\"id\" value=\"$id\">";
         echo "<input class=\"submit default_action\" type=\"submit\" name=\"change_room\" value=\"" . get_vocab("change") . "\">\n";
         echo "</div>\n";
       }
@@ -1064,7 +1137,7 @@ if (isset($change_room) && !empty($room))
 }
 
 // THE AREA FORM
-if (isset($change_area) &&!empty($area))
+if (isset($change_area) &&!empty($user))
 {
   // Only admins can see this form
   if (!$is_admin)
@@ -1073,7 +1146,7 @@ if (isset($change_area) &&!empty($area))
     exit();
   }
   // Get the details for this area
-  $res = sql_query("SELECT * FROM $tbl_area WHERE id=$area LIMIT 1");
+  $res = sql_query("SELECT * FROM users WHERE id=$user LIMIT 1");
   if (! $res)
   {
     fatal_error(0, get_vocab("error_area") . $area . get_vocab("not_found"));
@@ -1083,7 +1156,7 @@ if (isset($change_area) &&!empty($area))
   // Get the settings for this area, from the database if they are there, otherwise from
   // the config file.    A little bit inefficient repeating the SQL query
   // we've just done, but it makes the code simpler and this page is not used very often.
-  get_area_settings($area);
+  //get_area_settings($area);
 
   echo "<form class=\"form_general\" id=\"edit_area\" action=\"edit_area_room.php\" method=\"post\">\n";
   echo "<fieldset class=\"admin\">\n";
@@ -1107,34 +1180,58 @@ if (isset($change_area) &&!empty($area))
   echo "</fieldset>\n";
   
   echo "<fieldset>\n";
-  echo "<legend>" . get_vocab("general_settings") . "</legend>\n";
+  //echo "<legend>" . get_vocab("general_settings") . "</legend>\n";
   echo "<input type=\"hidden\" name=\"area\" value=\"" . $row["id"] . "\">\n";
   
   // Area name  
   echo "<div>\n";
-  $params = array('label' => get_vocab("name") . ":",
-                  'name'  => 'area_name',
-                  'value' => $row['area_name']);
+  $params = array('label' => get_vocab("username") . ":",
+                  'name'  => 'name',
+                  'value' => $row['name']);
   generate_input($params);
   echo "</div>\n";
-        
+
+  // Code
+  echo "<div>\n";
+  $params = array('label' => get_vocab("usercode") . ":",
+                  'name'  => 'code',
+                  'value' => $row['code']);
+  generate_input($params);
+  echo "</div>\n";
+
+  // Team
+  echo "<div>\n";
+  $params = array('label' => get_vocab("team") . ":",
+                  'name'  => 'team',
+                  'value' => $row['team']);
+  generate_input($params);
+  echo "</div>\n";
+
+  // Role
+  echo "<div>\n";
+  $params = array('label' => get_vocab("name") . ":",
+                  'name'  => 'role',
+                  'value' => $row['role']);
+  generate_input($params);
+  echo "</div>\n";
+
   // Status - Enabled or Disabled
   echo "<div id=\"status\">\n";
   $options = array('0' => get_vocab("enabled"),
                    '1' => get_vocab("disabled"));
   $params = array('label'       => get_vocab("status") . ":",
                   'label_title' => get_vocab("disabled_area_note"),
-                  'name'        => 'area_disabled',
+                  'name'        => 'disabled',
                   'value'       => ($row['disabled']) ? '1' : '0',
                   'options'     => $options,
                   'force_assoc' => TRUE);
   generate_radio_group($params);
   echo "</div>\n";
         
-  // Timezone
+  /*// Timezone
   create_field_entry_timezone();
-  
-  // Area admin email
+  */
+  /*// Area admin email
   echo "<div>\n";
   $params = array('label'       => get_vocab("area_admin_email") . ":",
                   'label_title' => get_vocab("email_list_note"),
@@ -1142,9 +1239,9 @@ if (isset($change_area) &&!empty($area))
                   'value'       => $row['area_admin_email'],
                   'attributes'  => array('rows="4"', 'cols="40"'));
   generate_textarea($params);
-  echo "</div>\n";
+  echo "</div>\n";*/
       
-  // The custom HTML
+  /*// The custom HTML
   echo "<div>\n";
   $params = array('label'       => get_vocab("custom_html") . ":",
                   'label_title' => get_vocab("custom_html_note"),
@@ -1152,9 +1249,9 @@ if (isset($change_area) &&!empty($area))
                   'value'       => $row['custom_html'],
                   'attributes'  => array('rows="4"', 'cols="40"'));
   generate_textarea($params);
-  echo "</div>\n";
+  echo "</div>\n";*/
         
-  // Mode - Times or Periods
+  /*// Mode - Times or Periods
   echo "<div id=\"mode\">\n";
   $options = array('1' => get_vocab("mode_periods"),
                    '0' => get_vocab("mode_times"));
@@ -1164,9 +1261,9 @@ if (isset($change_area) &&!empty($area))
                   'options'     => $options,
                   'force_assoc' => TRUE);
   generate_radio_group($params);
-  echo "</div>\n";
+  echo "</div>\n";*/
       
-  echo "</fieldset>\n";
+  /*echo "</fieldset>\n";
 
   // If we're using JavaScript, don't display the time settings section
   // if we're using periods (the JavaScript will display it if we change)
@@ -1245,12 +1342,12 @@ if (isset($change_area) &&!empty($area))
   generate_checkbox($params);
   echo "</div>\n";
   
-  echo "<div id=\"last_slot\" class=\"js_hidden\">\n";
+  echo "<div id=\"last_slot\" class=\"js_hidden\">\n";*/
   // The contents of this div will be overwritten by JavaScript if enabled.    The JavaScript version is a drop-down
   // select input with options limited to those times for the last slot start that are valid.   The options are
   // dynamically regenerated if the start of the first slot or the resolution change.    The code below is
   // therefore an alternative for non-JavaScript browsers.
-  echo "<div class=\"div_time\">\n";
+/*  echo "<div class=\"div_time\">\n";
   if ($twentyfourhour_format)
   {
     $value = sprintf("%02d", $eveningends);
@@ -1403,8 +1500,8 @@ if (isset($change_area) &&!empty($area))
   }
   echo "</div>\n";
   
-      ?>
-      </fieldset>
+      */?><!--
+      </fieldset>-->
     
       <fieldset class="submit_buttons">
       <legend></legend>
@@ -1413,6 +1510,7 @@ if (isset($change_area) &&!empty($area))
         </div>
         <div id="edit_area_room_submit_save">
           <input type="hidden" name="phase" value="2">
+          <input type="hidden" name="user" value="<?php echo $user?>">
           <input class="submit default_action" type="submit" name="change_area" value="<?php echo get_vocab("change") ?>">
         </div>
       </fieldset>

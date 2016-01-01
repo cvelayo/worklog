@@ -190,7 +190,7 @@ form.form_admin {float: left; clear: left; margin: 2em 0 0 0}
 .form_admin legend {font-size: small}
 .form_admin div {float: left; clear: left} 
 .form_admin label {
-    display: block; float: left; clear: left; 
+    display: block; float: left; clear: none;
     width: <?php echo $admin_form_label_width ?>em; min-height: 2.0em; text-align: right;
 }
 .form_admin input {
@@ -199,6 +199,8 @@ form.form_admin {float: left; clear: left; margin: 2em 0 0 0}
     margin-top: -0.2em; margin-left: <?php echo $admin_form_gap ?>em;
     font-family: <?php echo $standard_font_family ?>; font-size: small;
 }
+.form_admin label.radio {font-weight: normal; width: auto}
+.form_admin input.radio {margin-top: 0.1em; margin-right: 2px; width: auto}
 .form_admin input.submit {
     width: auto; margin-top: 1.2em; margin-left: <?php echo number_format(($admin_form_gap + $admin_form_label_width), 1, '.', '')?>em
 }

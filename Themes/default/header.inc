@@ -228,8 +228,8 @@ function print_theme_header($day, $month, $year, $user)
           </div>
         </form>
       </td>
-      <?php
-      // For session protocols that define their own logon box...
+<!--      --><?php
+/*      // For session protocols that define their own logon box...
       if (function_exists('PrintLogonBox'))
       {
         echo "<td>\n";
@@ -238,7 +238,7 @@ function print_theme_header($day, $month, $year, $user)
         echo "</div>\n";
         echo "</td>\n";
       }
-      ?>
+      */?>
     </tr>
   </table>
 </div>

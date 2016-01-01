@@ -5,17 +5,19 @@
 require "defaultincludes.inc";
 
 // Get non-standard form variables
-$area_name = get_form_var('area_name', 'string');
+$user_name = get_form_var('name', 'string');
 $error = get_form_var('error', 'string');
 // the image buttons:  need to specify edit_x rather than edit etc. because
 // IE6 only returns _x and _y
 $edit_x = get_form_var('edit_x', 'int');
 $delete_x = get_form_var('delete_x', 'int');
 
-
+$user = $_GET['user'];
+$success = $_GET['success'];
 // Check to see whether the Edit or Delete buttons have been pressed and redirect
 // as appropriate
-$std_query_string = "area=$area&day=$day&month=$month&year=$year";
+
+$std_query_string = "user=$user&day=$day&month=$month&year=$year";
 if (isset($edit_x))
 {
   $location = $location = "edit_area_room.php?change_area=1&phase=1&$std_query_string";
@@ -29,18 +31,18 @@ if (isset($delete_x))
   exit;
 }
   
-// Check the user is authorised for this page
+/*// Check the user is authorised for this page
 checkAuthorised();
 
 // Also need to know whether they have admin rights
 $user = getUserName();
 $required_level = (isset($max_level) ? $max_level : 2);
-$is_admin = (authGetUserLevel($user) >= $required_level);
+$is_admin = (authGetUserLevel($user) >= $required_level);*/
 
-print_header($day, $month, $year, isset($area) ? $area : "", isset($room) ? $room : "");
+print_header($day, $month, $year, $user);
 
 // Get the details we need for this area
-if (isset($area))
+/*if (isset($user))
 {
   $res = sql_query("SELECT area_name, custom_html FROM $tbl_area WHERE id=$area LIMIT 1");
   if (! $res)
@@ -55,7 +57,7 @@ if (isset($area))
     $custom_html = $row['custom_html'];
   }
   sql_free($res);
-}
+}*/
 
 
 echo "<h2>" . get_vocab("administration") . "</h2>\n";
@@ -63,13 +65,15 @@ if (!empty($error))
 {
   echo "<p class=\"error\">" . get_vocab($error) . "</p>\n";
 }
-
+if ($success)
+{echo "<p>Update succeeded!";}
 // TOP SECTION:  THE FORM FOR SELECTING AN AREA
 echo "<div id=\"area_form\">\n";
-$sql = "SELECT id, area_name, disabled
-          FROM $tbl_area
-      ORDER BY disabled, area_name";
+$sql = "SELECT id, name, disabled
+          FROM users
+      ORDER BY disabled, name";
 $res = sql_query($sql);
+
 $areas_defined = $res && (sql_count($res) > 0);
 if (!$areas_defined)
 {
@@ -90,7 +94,6 @@ else
       $n_displayable_areas++;
     }
   }
-
   if ($n_displayable_areas == 0)
   {
     echo "<p>" . get_vocab("noareas_enabled") . "</p>\n";
@@ -101,10 +104,10 @@ else
     echo "<form id=\"areaChangeForm\" method=\"get\" action=\"" . htmlspecialchars(this_page()) . "\">\n";
     echo "<fieldset>\n";
     echo "<legend></legend>\n";
-  
     // The area selector
     echo "<label id=\"area_label\" for=\"area_select\">" . get_vocab("area") . ":</label>\n";
-    echo "<select class=\"room_area_select\" id=\"area_select\" name=\"area\" onchange=\"this.form.submit()\">";
+    echo "<select class=\"room_area_select\" id=\"area_select\" name=\"user\" onchange=\"this.form.submit()\">";
+    $is_admin =1;
     if ($is_admin)
     {
       if ($areas[0]['disabled'])
@@ -118,6 +121,7 @@ else
         echo "<optgroup label=\"" . get_vocab("enabled") . "\">\n";
       }
     }
+
     foreach ($areas as $a)
     {
       if ($is_admin || !$a['disabled'])
@@ -128,8 +132,8 @@ else
           echo "<optgroup label=\"" . get_vocab("disabled") . "\">\n";
           $done_change = TRUE;
         }
-        $selected = ($a['id'] == $area) ? "selected=\"selected\"" : "";
-        echo "<option $selected value=\"". $a['id']. "\">" . htmlspecialchars($a['area_name']) . "</option>";
+        $selected = ($a['id'] == $user) ? "selected=\"selected\"" : "";
+        echo "<option $selected value=\"". $a['id']. "\">" . htmlspecialchars($a['name']). "</option>";
       }
     }
     if ($is_admin)
@@ -173,8 +177,20 @@ if ($is_admin)
       <input type="hidden" name="type" value="area">
 
       <div>
-        <label for="area_name"><?php echo get_vocab("name") ?>:</label>
-        <input type="text" id="area_name" name="name" maxlength="<?php echo $maxlength['area.area_name'] ?>">
+        <label for="name"><?php echo get_vocab("username") ?>:</label>
+        <input type="text" id="name" name="name" maxlength="<?php echo $maxlength['area.area_name'] ?>">
+      </div>
+      <div>
+        <label for="code"><?php echo get_vocab("usercode") ?>:</label>
+        <input type="text" id="code" name="code" maxlength="<?php echo $maxlength['area.area_name'] ?>">
+      </div>
+      <div>
+        <label for="team"><?php echo get_vocab("team") ?>:</label>
+        <input type="text" id="team" name="team" maxlength="<?php echo $maxlength['area.area_name'] ?>">
+      </div>
+      <div>
+        <label for="role"><?php echo get_vocab("role") ?>:</label>
+        <input type="text" id="role" name="role" maxlength="<?php echo $maxlength['area.area_name'] ?>">
       </div>
           
       <div>
@@ -197,20 +213,22 @@ echo "</div>\n";
 // BOTTOM SECTION: ROOMS IN THE SELECTED AREA
 // Only display the bottom section if the user is an admin or
 // else if there are some areas that can be displayed
-if ($is_admin || ($n_displayable_areas > 0))
+
+if ($is_admin)
 {
   echo "<h2>\n";
   echo get_vocab("rooms");
-  if(isset($area_name))
+/*  if(isset($area_name))
   { 
     echo " " . get_vocab("in") . " " . htmlspecialchars($area_name); 
-  }
+  }*/
   echo "</h2>\n";
 
   echo "<div id=\"room_form\">\n";
+  $area = 1;
   if (isset($area))
   {
-    $res = sql_query("SELECT * FROM $tbl_room WHERE area_id=$area ORDER BY sort_key");
+    $res = sql_query("SELECT * FROM codes ORDER BY code");
     if (! $res)
     {
       trigger_error(sql_error(), E_USER_WARNING);
@@ -223,7 +241,7 @@ if ($is_admin || ($n_displayable_areas > 0))
     else
     {
        // Get the information about the fields in the room table
-      $fields = sql_field_info($tbl_room);
+      $fields = sql_field_info('codes');
     
       // Build an array with the room info and also see if there are going
       // to be any rooms to display (in other words rooms if you are not an
@@ -256,7 +274,7 @@ if ($is_admin || ($n_displayable_areas > 0))
         echo "<thead>\n";
         echo "<tr>\n";
 
-        echo "<th>" . get_vocab("name") . "</th>\n";
+        echo "<th>" . get_vocab("code") . "</th>\n";
         if ($is_admin)
         {
         // Don't show ordinary users the disabled status:  they are only going to see enabled rooms
@@ -264,7 +282,7 @@ if ($is_admin || ($n_displayable_areas > 0))
         }
         // ignore these columns, either because we don't want to display them,
         // or because we have already displayed them in the header column
-        $ignore = array('id', 'area_id', 'room_name', 'disabled', 'sort_key', 'custom_html');
+        $ignore = array('id', 'area_id', 'room_name', 'disabled', 'sort_key', 'custom_html', 'code');
         foreach($fields as $field)
         {
           if (!in_array($field['name'], $ignore))
@@ -273,13 +291,14 @@ if ($is_admin || ($n_displayable_areas > 0))
             {
               // the standard MRBS fields
               case 'description':
-              case 'capacity':
-              case 'room_admin_email':
+              case 'Face to Face':
+              case 'Available':
                 $text = get_vocab($field['name']);
                 break;
               // any user defined fields
               default:
-                $text = get_loc_field_name($tbl_room, $field['name']);
+                $text = get_loc_field_name($codes, $field['name']);
+                $text = get_vocab($text);
                 break;
             }
             // We don't use htmlspecialchars() here because the column names are
@@ -288,10 +307,10 @@ if ($is_admin || ($n_displayable_areas > 0))
           }
         }
         
-        if ($is_admin)
+        /*if ($is_admin)
         {
           echo "<th>&nbsp;</th>\n";
-        }
+        }*/
         
         echo "</tr>\n";
         echo "</thead>\n";
@@ -307,12 +326,12 @@ if ($is_admin || ($n_displayable_areas > 0))
             $row_class = ($row_class == "even") ? "odd" : "even";
             echo "<tr class=\"$row_class\">\n";
 
-            $html_name = htmlspecialchars($r['room_name']);
+            $html_name = htmlspecialchars($r['code']);
             // We insert an invisible span containing the sort key so that the rooms will
             // be sorted properly
             echo "<td><div>" .
                  "<span>" . htmlspecialchars($r['sort_key']) . "</span>" .
-                 "<a title=\"$html_name\" href=\"edit_area_room.php?change_room=1&amp;phase=1&amp;room=" . $r['id'] . "\">$html_name</a>" .
+                 "<a title=\"$html_name\" href=\"edit_area_room.php?change_room=1&amp;phase=1&amp;code=" . $r['code'] . "\">$html_name</a>" .
                  "</div></td>\n";
             if ($is_admin)
             {
@@ -364,7 +383,7 @@ if ($is_admin || ($n_displayable_areas > 0))
               }  // if
             }  // foreach
             
-            // Give admins a delete link
+           /* // Give admins a delete link
             if ($is_admin)
             {
               // Delete link
@@ -375,7 +394,7 @@ if ($is_admin || ($n_displayable_areas > 0))
                          title=\"" . get_vocab("delete") . "\">\n";
               echo "</a>\n";
               echo "</div></td>\n";
-            }
+            }*/
             
             echo "</tr>\n";
           }
@@ -403,23 +422,42 @@ if ($is_admin || ($n_displayable_areas > 0))
       <legend><?php echo get_vocab("addroom") ?></legend>
         
         <input type="hidden" name="type" value="room">
-        <input type="hidden" name="area" value="<?php echo $area; ?>">
+        <input type="hidden" name="name" value="<?php echo $code; ?>">
         
         <div>
-          <label for="room_name"><?php echo get_vocab("name") ?>:</label>
-          <input type="text" id="room_name" name="name" maxlength="<?php echo $maxlength['room.room_name'] ?>">
+          <label for="room_name"><?php echo get_vocab("Code") ?>:</label>
+          <input type="text" id="code" name="code" maxlength="<?php echo $maxlength['room.room_name'] ?>">
         </div>
         
         <div>
           <label for="room_description"><?php echo get_vocab("description") ?>:</label>
-          <input type="text" id="room_description" name="description" maxlength="<?php echo $maxlength['room.description'] ?>">
+          <input type="text" id="code_description" name="description" maxlength="<?php echo $maxlength['room.description'] ?>">
         </div>
         
         <div>
-          <label for="room_capacity"><?php echo get_vocab("capacity") ?>:</label>
-          <input type="text" id="room_capacity" name="capacity">
+          <label><?php echo get_vocab("f2f") ?>:</label>
+          <label class="radio"><input class="radio" type="radio" name="f2f" value="1">Yes</label>
+          <label class="radio"><input class ="radio" type="radio" name="f2f" value="0" checked="checked">No</label>
         </div>
-       
+
+        <div>
+          <label><?php echo get_vocab("available") ?>:</label>
+          <label class="radio"><input class="radio" type="radio" name="available" value="1">Yes</label>
+          <label class="radio"><input class ="radio" type="radio" name="available" value="0" checked="checked">No</label>
+        </div>
+
+        <div>
+          <label><?php echo get_vocab("dnka") ?>:</label>
+          <label class="radio"><input class="radio" type="radio" name="dnka" value="1">Yes</label>
+          <label class="radio"><input class ="radio" type="radio" name="dnka" value="0" checked="checked">No</label>
+        </div>
+
+        <div>
+          <label><?php echo get_vocab("outreach") ?>:</label>
+          <label class="radio"><input class="radio" type="radio" name="outreach" value="1">Yes</label>
+          <label class="radio"><input class ="radio" type="radio" name="outreach" value="0" checked="checked">No</label>
+        </div>
+
         <div>
           <input type="submit" class="submit" value="<?php echo get_vocab("addroom") ?>">
         </div>

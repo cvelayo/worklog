@@ -1,7 +1,7 @@
 <?php
 // $Id$
-require "connection.php";
-global $mysqli;
+/*require "connection.php";
+global $mysqli;*/
 define('INTERVAL_DAY', 0);
 
 /** mrbsCheckFree()

@@ -6,6 +6,7 @@
 // Checks that they are valid and assigns sensible defaults if not
 
 // Get the standard form variables
+date_default_timezone_set($timezone);
 $day = get_form_var('day', 'int');
 $month = get_form_var('month', 'int');
 $year = get_form_var('year', 'int');
