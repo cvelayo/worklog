@@ -362,6 +362,7 @@ $vocab["available"]          = "Available time";
 $vocab["dnka"]               = "Counted as DNKA";
 $vocab["outreach"]           = "Outreach time";
 $vocab["code"]               = "Code";
+$vocab["nocount"]            = "Non-counting code";
 $vocab["duplicate"]          = "Duplicate code. Please enter a unique code.";
 
 // Used in edit_area_room.php

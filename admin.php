@@ -459,6 +459,13 @@ if ($is_admin)
         </div>
 
         <div>
+          <label><?php echo get_vocab("nocount") ?>:</label>
+          <label class="radio"><input class="radio" type="radio" name="nocount" value="1">Yes</label>
+          <label class="radio"><input class ="radio" type="radio" name="noucount" value="0" checked="checked">No</label>
+        </div>
+
+
+        <div>
           <input type="submit" class="submit" value="<?php echo get_vocab("addroom") ?>">
         </div>
         

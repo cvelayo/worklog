@@ -11,7 +11,6 @@ function generate_search_criteria(&$vars)
   global $user_level, $tbl_entry, $tbl_area, $tbl_room;
   global $field_natures, $field_lengths;
   global $report_search_field_order;
-  
   echo "<fieldset>\n";
   echo "<legend>" . get_vocab("search_criteria") . "</legend>\n";
   
@@ -33,161 +32,25 @@ function generate_search_criteria(&$vars)
         genDateSelector("to_", $vars['to_day'], $vars['to_month'], $vars['to_year']);
         echo "</div>\n";
         break;
-      
-        
-      case 'areamatch':
-        $options = sql_query_array("SELECT area_name FROM $tbl_area ORDER BY area_name");
-        if ($options === FALSE)
-        {
-          trigger_error(sql_error(), E_USER_WARNING);
-          fatal_error(FALSE, get_vocab("fatal_db_error"));
-        }
-        echo "<div id=\"div_areamatch\">\n";
-        $params = array('label'         => get_vocab("match_area") . ':',
-                        'name'          => 'areamatch',
-                        'options'       => $options,
-                        'force_indexed' => TRUE,
-                        'value'         => $vars['areamatch']);
-        generate_datalist($params);
-        echo "</div>\n";
-        break;
-        
-        
-      case 'roommatch':
-        // (We need DISTINCT because it's possible to have two rooms of the same name
-        // in different areas)
-        $options = sql_query_array("SELECT DISTINCT room_name FROM $tbl_room ORDER BY room_name");
-        if ($options === FALSE)
-        {
-          trigger_error(sql_error(), E_USER_WARNING);
-          fatal_error(FALSE, get_vocab("fatal_db_error"));
-        }
-        echo "<div id=\"div_roommatch\">\n";
-        $params = array('label'         => get_vocab("match_room") . ':',
-                        'name'          => 'roommatch',
-                        'options'       => $options,
-                        'force_indexed' => TRUE,
-                        'value'         => $vars['roommatch']);
-        generate_datalist($params);
-        echo "</div>\n";
-        break;
-      
-        
-      case 'typematch':  
-        echo "<div id=\"div_typematch\">\n";
-        $options = array();
-        foreach ($booking_types as $type)
-        {
-          $options[$type] = get_type_vocab($type);
-        }
-        $params = array('label'        => get_vocab("match_type") . ':',
-                        'name'         => 'typematch[]',
-                        'id'           => 'typematch',
-                        'options'      => $options,
-                        'force_assoc'  => TRUE,  // in case the type keys happen to be digits
-                        'value'        => $vars['typematch'],
-                        'multiple'     => TRUE,
-                        'attributes'   => 'size="5"');
-        generate_select($params);
-        echo "<span>" . get_vocab("ctrl_click_type") . "</span>\n";
-        echo "</div>\n";
-        break;
-      
-        
-      case 'namematch':  
-        echo "<div id=\"div_namematch\">\n";
-        $params = array('label' => get_vocab("match_entry") . ':',
-                        'name'  => 'namematch',
-                        'value' => $vars['namematch']);
-        generate_input($params);
-        echo "</div>\n";
-        break;
-      
-        
-      case 'descrmatch':
-        echo "<div id=\"div_descrmatch\">\n";
-        $params = array('label' => get_vocab("match_descr") . ':',
-                        'name'  => 'descrmatch',
-                        'value' => $vars['descrmatch']);
-        generate_input($params);
-        echo "</div>\n";
-        break;
-  
-      
-      case 'creatormatch':
-        echo "<div id=\"div_creatormatch\">\n";
-        $params = array('label' => get_vocab("createdby") . ':',
-                        'name'  => 'creatormatch',
-                        'value' => $vars['creatormatch']);
-        generate_input($params);
-        echo "</div>\n";
-        break;
-        
 
-      case 'match_private':
-        // Privacy status
-        // Only show this part of the form if there are areas that allow private bookings
-        if ($private_somewhere)
-        {
-          // If they're not logged in then there's no point in showing this part of the form because
-          // they'll only be able to see public bookings anyway (and we don't want to alert them to
-          // the existence of private bookings)
-          if (empty($user_level))
-          {
-            echo "<input type=\"hidden\" name=\"match_private\" value=\"" . PRIVATE_NO . "\">\n";
-          }
-          // Otherwise give them the radio buttons
-          else
-          {
-            echo "<div id=\"div_privacystatus\">\n";
-            $options = array(PRIVATE_BOTH => get_vocab("both"), PRIVATE_NO => get_vocab("default_public"), PRIVATE_YES => get_vocab("default_private"));
-            $params = array('label'       => get_vocab("privacy_status") . ':',
-                            'name'        => 'match_private',
-                            'options'     => $options,
-                            'force_assoc' => TRUE,
-                            'value'       => $vars['match_private']);
-            generate_radio_group($params);
-            echo "</div>\n";
-          }
-        }
+        
+      case 'teammatch':
+        echo "<div id=\"div_teammatch\">\n";
+        $params = array('label' => get_vocab("Team match") . ':',
+                        'name'  => 'teammatch',
+                        'value' => $vars['teammatch']);
+        generate_input($params);
+        echo "</div>\n";
         break;
-        
-      
-      case 'match_confirmed':
-        // Confirmation status
-        // Only show this part of the form if there are areas that require approval
-        if ($confirmation_somewhere)
-        {
-          echo "<div id=\"div_confirmationstatus\">\n";
-          $options = array(CONFIRMED_BOTH => get_vocab("both"), CONFIRMED_YES => get_vocab("confirmed"), CONFIRMED_NO => get_vocab("tentative"));
-          $params = array('label'       => get_vocab("confirmation_status") . ':',
-                          'name'        => 'match_confirmed',
-                          'options'     => $options,
-                          'force_assoc' => TRUE,
-                          'value'       => $vars['match_confirmed']);
-          generate_radio_group($params);
-          echo "</div>\n";
-        }
+
+      case 'rolematch':
+        echo "<div id=\"div_rolematch\">\n";
+        $params = array('label' => get_vocab("Role match") . ':',
+            'name'  => 'rolematch',
+            'value' => $vars['rolematch']);
+        generate_input($params);
+        echo "</div>\n";
         break;
-        
-        
-      case 'match_approved':
-        // Approval status
-        // Only show this part of the form if there are areas that require approval
-        if ($approval_somewhere)
-        {
-          echo "<div id=\"div_approvalstatus\">\n";
-          $options = array(APPROVED_BOTH => get_vocab("both"), APPROVED_YES => get_vocab("approved"), APPROVED_NO => get_vocab("awaiting_approval"));
-          $params = array('label'       => get_vocab("approval_status") . ':',
-                          'name'        => 'match_approved',
-                          'options'     => $options,
-                          'force_assoc' => TRUE,
-                          'value'       => $vars['match_approved']);
-          generate_radio_group($params);
-          echo "</div>\n";
-        }
-        break;
-        
 
       default:
         // Must be a custom field
@@ -1159,10 +1022,7 @@ foreach ($report_presentation_fields as $field)
 }
 
 // Build the report search field order
-$report_search_fields = array('report_start', 'report_end',
-                              'areamatch', 'roommatch',
-                              'typematch', 'namematch', 'descrmatch', 'creatormatch',
-                              'match_private', 'match_confirmed', 'match_approved');
+$report_search_fields = array('report_start', 'report_end', 'teammatch', 'rolematch');
   
 foreach ($report_search_fields as $field)
 {
@@ -1172,8 +1032,8 @@ foreach ($report_search_fields as $field)
   }
 }
   
-// Get information about custom fields
-$fields = sql_field_info($tbl_entry);
+/*// Get information about custom fields
+$fields = sql_field_info('times1');
 $custom_fields = array();
 $field_natures = array();
 $field_lengths = array();
@@ -1207,7 +1067,7 @@ foreach ($custom_fields as $key => $value)
     $var_type = 'string';
   }
   $$var = get_form_var($var, $var_type);
-}
+}*/
 
 // Set the field order list
 $field_order_list = array('name', 'area_name', 'room_name', 'start_time', 'end_time',
@@ -1224,27 +1084,31 @@ $field_order_list[] = 'last_updated';
 // PHASE 2:  SQL QUERY.  We do the SQL query now to see if there's anything there
 if ($phase == 2)
 {
+  $teammatch = $_GET['teammatch'];
+  $rolematch = $_GET['rolematch'];
+
   // Start and end times are also used to clip the times for summary info.
   $report_start = mktime(0, 0, 0, $from_month+0, $from_day+0, $from_year+0);
   $report_end = mktime(0, 0, 0, $to_month+0, $to_day+1, $to_year+0);
   
   // Construct the SQL query
-  $sql = "SELECT E.*, "
-       . "C.code, C.f2f, C.available, C.dnka, C.outreach";
+  $sql = "SELECT E.*, (E.end_time - E.start_time) AS duration,"
+       . "C.code, C.f2f, C.available, C.dnka, C.outreach, C.nocount,
+       U.team, U.role";
   if ($output_format == OUTPUT_ICAL)
   {
     // If we're producing an iCalendar then we'll also need the repeat
     // information in order to construct the recurrence rule
     $sql .= ", T.rep_type, T.end_date, T.rep_opt, T.rep_num_weeks, T.month_absolute, T.month_relative";
   }
-  $sql .= " FROM codes C, times E";
+  $sql .= " FROM codes C, times E, users U";
   if ($output_format == OUTPUT_ICAL)
   {
     // We do a LEFT JOIN because we still want the single entries, ie the ones
     // that won't have a match in the repeat table
     $sql .= " LEFT JOIN $tbl_repeat T ON E.repeat_id=T.id";
   }
-  $sql .= " WHERE E.type = C.code AND E.start_time < $report_end AND E.end_time > $report_start";
+  $sql .= " WHERE E.type = C.code AND E.start_time < $report_end AND E.end_time > $report_start AND U.code = E.user";
   if ($output_format == OUTPUT_ICAL)
   {
     // We can't export periods in an iCalendar yet
@@ -1278,15 +1142,15 @@ if ($phase == 2)
       $sql .= "E.type = '".sql_escape($typematch[0])."'";
     }
   }
-  if (!empty($namematch))
+  if (!empty($teammatch))
   {
     // sql_syntax_caseless_contains() does the SQL escaping
-    $sql .= " AND" .  sql_syntax_caseless_contains("E.name", $namematch);
+    $sql .= " AND" .  sql_syntax_caseless_contains("U.team", $teammatch);
   }
-  if (!empty($descrmatch))
+  if (!empty($rolematch))
   {
     // sql_syntax_caseless_contains() does the SQL escaping
-    $sql .= " AND" .  sql_syntax_caseless_contains("E.description", $descrmatch);
+    $sql .= " AND" .  sql_syntax_caseless_contains("U.role", $rolematch);
   }
   if (!empty($creatormatch))
   {
@@ -1490,9 +1354,6 @@ if ($output_form)
   // Do the search criteria fieldset
   $search_var_keys = array('from_day', 'from_month', 'from_year',
                            'to_day', 'to_month', 'to_year',
-                           'areamatch', 'roommatch',
-                           'typematch', 'namematch', 'descrmatch', 'creatormatch',
-                           'match_private', 'match_confirmed', 'match_approved',
                            'custom_fields');
   $search_vars = array();
   foreach($search_var_keys as $var)
@@ -1573,14 +1434,57 @@ if ($phase == 2)
     else
     {
       open_summary();
+      $hours = array();
       if ($nmatch > 0)
       {
         for ($i = 0; ($row = sql_row_keyed($res, $i)); $i++)
         {
-          accumulate($row, $count, $hours,
+          /*accumulate($row, $count, $hours,
                      $report_start, $report_end,
-                     $room_hash, $name_hash);
+                     $room_hash, $name_hash);*/
+          if (!$row['nocount'])
+          {
+            $string_all = 'all/' . $row['team'] . "/".$row['role'];
+            $string_f2f = 'f2f/' . $row['team'] . "/".$row['role'];
+            $string_available = 'available/' . $row['team'] . "/".$row['role'];
+            $string_dnka = 'dnka/' . $row['team'] . "/".$row['role'];
+            $string_outreach = 'outreach/' . $row['team'] . "/".$row['role'];
+            $keys_all = explode('/', $string_all);
+            $keys_f2f = explode('/', $string_f2f);
+            $keys_available = explode('/', $string_available);
+            $keys_dnka = explode('/', $string_dnka);
+            $keys_outreach = explode('/', $string_outreach);
+
+            $ref = &$hours;
+            while ($key = array_shift($keys_f2f)) {
+              $ref = &$ref[$key];
+            }
+            $ref = isset($ref) ? ($row['duration'] * $row['f2f']) + $ref : ($row['duration'] * $row['f2f']);
+            $ref2 = &$hours;
+            while ($key = array_shift($keys_available)) {
+              $ref2 = &$ref2[$key];
+            }
+            $ref2 = isset($ref2) ? ($row['duration'] * $row['available']) + $ref2 : ($row['duration'] * $row['available']);
+            $ref3 = &$hours;
+            while ($key = array_shift($keys_outreach)) {
+              $ref3 = &$ref3[$key];
+            }
+            $ref3 = isset($ref3) ? ($row['duration'] * $row['outreach']) + $ref3 : ($row['duration'] * $row['outreach']);
+            $ref4 = &$hours;
+            while ($key = array_shift($keys_dnka)) {
+              $ref4 = &$ref4[$key];
+            }
+            $ref4 = isset($ref4) ? ($row['duration'] * $row['dnka']) + $ref4 : ($row['duration'] * $row['dnka']);
+            $ref5 = &$hours;
+            while ($key = array_shift($keys_all)) {
+              $ref5 = &$ref5[$key];
+            }
+            $ref5 = isset($ref5) ? (int)$row['duration'] + $ref5 : (int)$row['duration'];
+          }
+
         }
+        var_dump($hours);
+        echo array_sum(array_column($hours['f2f']['SW'], 'staff'));
         do_summary($count, $hours, $room_hash, $name_hash);
       }
       else

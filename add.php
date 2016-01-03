@@ -57,8 +57,9 @@ elseif ($type == "room")
   $available = $_POST['available'];
   $dnka = $_POST['dnka'];
   $outreach = $_POST['outreach'];
-  $sql = "INSERT INTO codes (code, description, f2f, available, dnka, outreach, disabled)
-          VALUES ('$code', '$description', $f2f, $available, $dnka, $outreach, 0)";
+  $nocount = $_POST['nocount'];
+  $sql = "INSERT INTO codes (code, description, f2f, available, dnka, outreach, nocount, disabled)
+          VALUES ('$code', '$description', $f2f, $available, $dnka, $outreach, $nocount, 0)";
   if (!sql_mutex_lock("users"))
   {
     fatal_error(TRUE, get_vocab("failed_to_acquire"));
