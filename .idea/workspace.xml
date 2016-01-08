@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="121ecb99-4247-4eca-bfaa-e260a9403c71" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/copyright/profiles_settings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.ids" afterPath="$PROJECT_DIR$/.idea/dataSources.ids" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+<<<<<<< HEAD
 <<<<<<< HEAD
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config.inc.php" afterPath="$PROJECT_DIR$/config.inc.php" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dbsys.inc" afterPath="$PROJECT_DIR$/dbsys.inc" />
@@ -20,6 +16,9 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lang/lang.en" afterPath="$PROJECT_DIR$/lang/lang.en" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/report.php" afterPath="$PROJECT_DIR$/report.php" />
 >>>>>>> parent of 76de590... Last MySQL version
+=======
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/report.php" afterPath="$PROJECT_DIR$/report.php" />
+>>>>>>> parent of 98e1dbc... before reverting commit
     </list>
     <ignored path="worklog.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -54,9 +53,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="temp.php" pinned="false" current-in-tab="true">
+      <file leaf-file-name="temp.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/temp.php">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
 <<<<<<< HEAD
             <state vertical-scroll-proportion="0.49896908">
               <caret line="111" column="49" selection-start-line="111" selection-start-column="49" selection-end-line="111" selection-end-column="49" />
@@ -64,9 +64,14 @@
             <state vertical-scroll-proportion="-5.9104476">
               <caret line="1243" column="10" selection-start-line="1243" selection-start-column="10" selection-end-line="1243" selection-end-column="10" />
 >>>>>>> parent of 76de590... Last MySQL version
+=======
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+>>>>>>> parent of 98e1dbc... before reverting commit
               <folding>
                 <element signature="e#6#109#0#PHP" expanded="true" />
                 <element signature="n#get_main_column_width#0;n#!!top" expanded="false" />
+                <element signature="n#time_cell_html#0;n#!!top" expanded="false" />
                 <element signature="n#get_n_time_slots#0;n#!!top" expanded="false" />
                 <element signature="e#44098#44586#0#PHP" expanded="false" />
                 <element signature="e#44175#44540#0#PHP" expanded="false" />
@@ -78,52 +83,27 @@
                 <element signature="e#45658#45815#0#PHP" expanded="false" />
                 <element signature="e#45816#46102#0#PHP" expanded="false" />
                 <element signature="e#46103#48180#0#PHP" expanded="false" />
-                <marker date="1452275999114" expanded="true" signature="27848:27944" placeholder="SELECT COUNT... users" />
-                <marker date="1452275999114" expanded="true" signature="31253:31501" placeholder="SELECT user,... times" />
-                <marker date="1452275999114" expanded="true" signature="34111:34132" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="44770:44798" placeholder="SELECT code,... users" />
-                <marker date="1452275999114" expanded="true" signature="45243:45307" placeholder="SELECT name users" />
-                <marker date="1452275999114" expanded="true" signature="48569:48609" placeholder="SELECT DISTI... users" />
-                <marker date="1452275999114" expanded="true" signature="48824:48885" placeholder="SELECT * FRO... users" />
-                <marker date="1452275999114" expanded="true" signature="49753:50292" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="49780:50285" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="49812:49964" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="49890:49953" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="49993:50094" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="50032:50083" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="50125:50276" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="50203:50265" placeholder="..." />
+                <marker date="1451605487982" expanded="true" signature="27848:27944" placeholder="SELECT COUNT... users" />
+                <marker date="1451605487982" expanded="true" signature="31253:31501" placeholder="SELECT user,... times" />
+                <marker date="1451605487982" expanded="true" signature="34111:34132" placeholder="..." />
+                <marker date="1451605487982" expanded="true" signature="44770:44798" placeholder="SELECT code,... users" />
+                <marker date="1451605487982" expanded="true" signature="45243:45307" placeholder="SELECT name users" />
+                <marker date="1451605487982" expanded="true" signature="48563:48603" placeholder="SELECT DISTI... users" />
+                <marker date="1451605487982" expanded="true" signature="48808:48869" placeholder="SELECT * FRO... users" />
+                <marker date="1451605487982" expanded="true" signature="49711:50250" placeholder="..." />
+                <marker date="1451605487982" expanded="true" signature="49738:50243" placeholder="..." />
+                <marker date="1451605487982" expanded="true" signature="49770:49922" placeholder="..." />
+                <marker date="1451605487982" expanded="true" signature="49848:49911" placeholder="..." />
+                <marker date="1451605487982" expanded="true" signature="49951:50052" placeholder="..." />
+                <marker date="1451605487982" expanded="true" signature="49990:50041" placeholder="..." />
+                <marker date="1451605487982" expanded="true" signature="50083:50234" placeholder="..." />
+                <marker date="1451605487982" expanded="true" signature="50161:50223" placeholder="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="temp2.php" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/temp2.php">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding>
-                <marker date="1452275999114" expanded="true" signature="27848:27944" placeholder="SELECT COUNT... users" />
-                <marker date="1452275999114" expanded="true" signature="31253:31501" placeholder="SELECT user,... times" />
-                <marker date="1452275999114" expanded="true" signature="34111:34132" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="44770:44798" placeholder="SELECT code,... users" />
-                <marker date="1452275999114" expanded="true" signature="45243:45307" placeholder="SELECT name users" />
-                <marker date="1452275999114" expanded="true" signature="48569:48609" placeholder="SELECT DISTI... users" />
-                <marker date="1452275999114" expanded="true" signature="48824:48885" placeholder="SELECT * FRO... users" />
-                <marker date="1452275999114" expanded="true" signature="49753:50292" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="49780:50285" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="49812:49964" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="49890:49953" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="49993:50094" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="50032:50083" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="50125:50276" placeholder="..." />
-                <marker date="1452275999114" expanded="true" signature="50203:50265" placeholder="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
+<<<<<<< HEAD
 <<<<<<< HEAD
       <file leaf-file-name="mysqli.inc" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mysqli.inc">
@@ -166,22 +146,25 @@
         </entry>
       </file>
       <file leaf-file-name="dbsys.inc" pinned="false" current-in-tab="false">
+=======
+      <file leaf-file-name="dbsys.inc" pinned="false" current-in-tab="true">
+>>>>>>> parent of 98e1dbc... before reverting commit
         <entry file="file://$PROJECT_DIR$/dbsys.inc">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-1.2307693">
-              <caret line="797" column="0" selection-start-line="797" selection-start-column="0" selection-end-line="797" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="5" />
               <folding>
-                <element signature="e#16796#16893#0#PHP" expanded="false" />
-                <element signature="e#17809#20077#0#PHP" expanded="false" />
-                <element signature="e#18485#19394#0#PHP" expanded="false" />
-                <element signature="e#18654#19390#0#PHP" expanded="false" />
-                <element signature="e#18936#19390#0#PHP" expanded="false" />
-                <element signature="e#19445#19603#0#PHP" expanded="false" />
-                <element signature="e#19635#19823#0#PHP" expanded="false" />
-                <element signature="e#19915#19991#0#PHP" expanded="false" />
-                <element signature="e#20212#20638#0#PHP" expanded="false" />
-                <element signature="e#20396#20636#0#PHP" expanded="false" />
-                <element signature="e#20436#20632#0#PHP" expanded="false" />
+                <element signature="e#16795#16892#0#PHP" expanded="false" />
+                <element signature="e#17808#20076#0#PHP" expanded="false" />
+                <element signature="e#18484#19393#0#PHP" expanded="false" />
+                <element signature="e#18653#19389#0#PHP" expanded="false" />
+                <element signature="e#18935#19389#0#PHP" expanded="false" />
+                <element signature="e#19444#19602#0#PHP" expanded="false" />
+                <element signature="e#19634#19822#0#PHP" expanded="false" />
+                <element signature="e#19914#19990#0#PHP" expanded="false" />
+                <element signature="e#20211#20637#0#PHP" expanded="false" />
+                <element signature="e#20395#20635#0#PHP" expanded="false" />
+                <element signature="e#20435#20631#0#PHP" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -190,12 +173,10 @@
       <file leaf-file-name="test.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-10.645162">
-              <caret line="15" column="8" selection-start-line="15" selection-start-column="8" selection-end-line="15" selection-end-column="51" />
+            <state vertical-scroll-proportion="-16.32258">
+              <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
               <folding>
                 <element signature="e#6#88#0#PHP" expanded="true" />
-                <marker date="1452279764879" expanded="true" signature="556:596" placeholder="SELECT DISTI... users" />
-                <marker date="1452279764879" expanded="true" signature="906:967" placeholder="SELECT * FRO... users" />
               </folding>
             </state>
           </provider>
@@ -204,7 +185,7 @@
       <file leaf-file-name="report.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/report.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.7096774">
+            <state vertical-scroll-proportion="0.0">
               <caret line="1455" column="10" selection-start-line="1455" selection-start-column="10" selection-end-line="1455" selection-end-column="10" />
 =======
       <file leaf-file-name="report.php" pinned="false" current-in-tab="true">
@@ -227,11 +208,9 @@
       <file leaf-file-name="config.inc.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config.inc.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="19.258064">
-              <caret line="17" column="11" selection-start-line="17" selection-start-column="11" selection-end-line="17" selection-end-column="11" />
-              <folding>
-                <marker date="1452279569281" expanded="true" signature="4670:4781" placeholder="..." />
-              </folding>
+            <state vertical-scroll-proportion="0.0">
+              <caret line="58" column="22" selection-start-line="58" selection-start-column="22" selection-end-line="58" selection-end-column="22" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -241,7 +220,7 @@
       <file leaf-file-name="admin.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/admin.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.0">
+            <state vertical-scroll-proportion="0.0">
               <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding>
                 <marker date="1451664466209" expanded="true" signature="1245:1312" placeholder="SELECT area_... ${$tbl_area}" />
@@ -289,11 +268,16 @@
         <option value="$PROJECT_DIR$/internalconfig.inc.php" />
         <option value="$PROJECT_DIR$/connection.php" />
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         <option value="$PROJECT_DIR$/dbsys.inc" />
         <option value="$PROJECT_DIR$/mysqli.inc" />
         <option value="$PROJECT_DIR$/config.inc.php" />
 >>>>>>> parent of 76de590... Last MySQL version
+=======
+        <option value="$PROJECT_DIR$/mysqli.inc" />
+        <option value="$PROJECT_DIR$/config.inc.php" />
+>>>>>>> parent of 98e1dbc... before reverting commit
         <option value="$PROJECT_DIR$/functions_view.inc" />
         <option value="$PROJECT_DIR$/edit_entry.php" />
         <option value="$PROJECT_DIR$/edit_entry_handler.php" />
@@ -304,9 +288,11 @@
         <option value="$PROJECT_DIR$/edit_area_room.php" />
         <option value="$PROJECT_DIR$/mrbs_sql.inc" />
         <option value="$PROJECT_DIR$/standard_vars.inc.php" />
+        <option value="$PROJECT_DIR$/temp.php" />
         <option value="$PROJECT_DIR$/admin.php" />
         <option value="$PROJECT_DIR$/add.php" />
         <option value="$PROJECT_DIR$/report.php" />
+<<<<<<< HEAD
 <<<<<<< HEAD
         <option value="$APPLICATION_CONFIG_DIR$/consoles/db/c7216c38-e399-40ad-87fc-0492f697ee66/console.sql" />
         <option value="$APPLICATION_CONFIG_DIR$/consoles/db/c7216c38-e399-40ad-87fc-0492f697ee66/console_1.sql" />
@@ -317,6 +303,10 @@
         <option value="$PROJECT_DIR$/dbsys.inc" />
 =======
 >>>>>>> parent of 76de590... Last MySQL version
+=======
+        <option value="$PROJECT_DIR$/dbsys.inc" />
+        <option value="$PROJECT_DIR$/test.php" />
+>>>>>>> parent of 98e1dbc... before reverting commit
       </list>
     </option>
   </component>
@@ -366,11 +356,18 @@
     </navigator>
     <panes>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
       <pane id="Scope">
         <subPane subId="Problems" />
       </pane>
 >>>>>>> parent of 76de590... Last MySQL version
+=======
+      <pane id="Scope">
+        <subPane subId="Problems" />
+      </pane>
+      <pane id="Scratches" />
+>>>>>>> parent of 98e1dbc... before reverting commit
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -437,6 +434,7 @@
           </PATH>
         </subPane>
       </pane>
+<<<<<<< HEAD
       <pane id="Scratches" />
 <<<<<<< HEAD
       <pane id="Scope">
@@ -444,11 +442,13 @@
       </pane>
 =======
 >>>>>>> parent of 76de590... Last MySQL version
+=======
+>>>>>>> parent of 98e1dbc... before reverting commit
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="settings.editor.selected.configurable" value="SQL Dialects" />
+    <property name="settings.editor.selected.configurable" value="reference.webide.settings.project.settings.php" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/defaultincludes.inc" />
   </component>
@@ -458,7 +458,7 @@
     </key>
   </component>
   <component name="RunManager" selected="JavaScript Debug.temp.php">
-    <configuration default="false" name="temp.php" type="JavascriptDebugType" factoryName="JavaScript Debug" temporary="true" nameIsGenerated="true" engineId="98ca6316-2f89-46d9-a9e5-fa9e2b0625b3" uri="http://localhost:81/temp.php">
+    <configuration default="false" name="temp.php" type="JavascriptDebugType" factoryName="JavaScript Debug" temporary="true" nameIsGenerated="true" engineId="98ca6316-2f89-46d9-a9e5-fa9e2b0625b3" uri="http://localhost/worklog/temp.php">
       <method />
     </configuration>
     <configuration default="false" name="day.php" type="PhpLocalRunConfigurationType" factoryName="PHP Console" temporary="true" path="$PROJECT_DIR$/day.php">
@@ -536,27 +536,30 @@
     <editor active="true" />
     <layout>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <window_info id="Database Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32896176" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+=======
+>>>>>>> parent of 98e1dbc... before reverting commit
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18072917" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
 =======
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.17864583" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
 >>>>>>> parent of 76de590... Last MySQL version
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32896176" sideWeight="0.503125" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.33489582" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32896176" sideWeight="0.496875" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.49791667" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32896176" sideWeight="0.496875" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.49791667" order="3" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -592,6 +595,11 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/temp.php</url>
+          <line>1037</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
         <line-breakpoint enabled="true" type="php">
           <url>file://$PROJECT_DIR$/functions.inc</url>
           <line>1916</line>
@@ -649,6 +657,7 @@
   </component>
   <component name="editorHistoryManager">
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     <entry file="file://$PROJECT_DIR$/week.php">
       <provider selected="true" editor-type-id="text-editor">
@@ -667,10 +676,13 @@
         </state>
       </provider>
     </entry>
+=======
+>>>>>>> parent of 98e1dbc... before reverting commit
     <entry file="file://$PROJECT_DIR$/functions_table.inc">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="1030" column="0" selection-start-line="1030" selection-start-column="0" selection-end-line="1394" selection-end-column="1" />
+<<<<<<< HEAD
           <folding>
             <marker date="1445541636000" expanded="true" signature="26989:27177" placeholder="SELECT COUNT... ${$tbl_room}" />
             <marker date="1445541636000" expanded="true" signature="29228:29668" placeholder="SELECT R.id ${$tbl_entry}" />
@@ -680,6 +692,8 @@
             <marker date="1445541636000" expanded="true" signature="42081:42427" placeholder="SELECT room_... ${$tbl_entry}" />
             <marker date="1445541636000" expanded="true" signature="44876:44897" placeholder="..." />
           </folding>
+=======
+>>>>>>> parent of 98e1dbc... before reverting commit
         </state>
       </provider>
     </entry>
@@ -687,6 +701,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+<<<<<<< HEAD
           <folding>
             <marker date="1445541636000" expanded="true" signature="2165:2698" placeholder="..." />
             <marker date="1445541636000" expanded="true" signature="2192:2691" placeholder="..." />
@@ -696,6 +711,8 @@
             <marker date="1445541636000" expanded="true" signature="2530:2682" placeholder="..." />
             <marker date="1445541636000" expanded="true" signature="2618:2671" placeholder="..." />
           </folding>
+=======
+>>>>>>> parent of 98e1dbc... before reverting commit
         </state>
       </provider>
     </entry>
@@ -954,7 +971,10 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
 >>>>>>> parent of 76de590... Last MySQL version
+=======
+>>>>>>> parent of 98e1dbc... before reverting commit
     <entry file="file://$PROJECT_DIR$/index.php">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1303,15 +1323,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33291924">
           <caret line="692" column="39" selection-start-line="692" selection-start-column="33" selection-end-line="692" selection-end-column="39" />
-          <folding>
-            <marker date="1445541636000" expanded="true" signature="26989:27177" placeholder="SELECT COUNT... ${$tbl_room}" />
-            <marker date="1445541636000" expanded="true" signature="29228:29668" placeholder="SELECT R.id ${$tbl_entry}" />
-            <marker date="1445541636000" expanded="true" signature="30743:30996" placeholder="SELECT R.roo... ${$tbl_room}" />
-            <marker date="1445541636000" expanded="true" signature="32277:32298" placeholder="..." />
-            <marker date="1445541636000" expanded="true" signature="38822:39001" placeholder="SELECT COUNT... ${$tbl_room}" />
-            <marker date="1445541636000" expanded="true" signature="42081:42427" placeholder="SELECT room_... ${$tbl_entry}" />
-            <marker date="1445541636000" expanded="true" signature="44876:44897" placeholder="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1344,7 +1355,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.7096774">
           <caret line="82" column="0" selection-start-line="82" selection-start-column="0" selection-end-line="83" selection-end-column="63" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1382,7 +1392,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.103407755">
           <caret line="4" column="0" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1460,7 +1469,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="161" column="46" selection-start-line="161" selection-start-column="46" selection-end-line="161" selection-end-column="46" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1484,7 +1492,10 @@
       </provider>
     </entry>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of 98e1dbc... before reverting commit
     <entry file="file://$PROJECT_DIR$/mysqli.inc">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-1.032258">
@@ -1526,6 +1537,7 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/dbsys.inc">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.7419355">
@@ -1584,6 +1596,8 @@
       </provider>
     </entry>
 >>>>>>> parent of 76de590... Last MySQL version
+=======
+>>>>>>> parent of 98e1dbc... before reverting commit
     <entry file="file://$PROJECT_DIR$/css/mrbs.css.php">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-5.6865673">
@@ -2006,6 +2020,19 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/admin.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <marker date="1451664466209" expanded="true" signature="1245:1312" placeholder="SELECT area_... ${$tbl_area}" />
+            <marker date="1451664466209" expanded="true" signature="1884:1956" placeholder="SELECT id, a... ${$tbl_area}" />
+            <marker date="1451664466209" expanded="true" signature="1884:1960" placeholder="SELECT id, n... users" />
+            <marker date="1451664466209" expanded="true" signature="6949:6982" placeholder="SELECT * FRO... codes" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/add.php">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -2020,78 +2047,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/PEAR.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.50881314">
-          <caret line="1081" column="0" selection-start-line="1046" selection-start-column="0" selection-end-line="1085" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="dbDummy://dbview:/e951bac4/c7216c38-e399-40ad-87fc-0492f697ee66/worklog.INFORMATION_SCHEMA.TABLES">
-      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-        <state>
-          <filtering enabled="true" />
-        </state>
-      </provider>
-      <provider editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/c7216c38-e399-40ad-87fc-0492f697ee66/console.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.040366974">
-          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/c7216c38-e399-40ad-87fc-0492f697ee66/console_1.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.0">
-          <caret line="0" column="37" selection-start-line="0" selection-start-column="37" selection-end-line="0" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/admin.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <marker date="1451664466209" expanded="true" signature="1245:1312" placeholder="SELECT area_... ${$tbl_area}" />
-            <marker date="1451664466209" expanded="true" signature="1884:1956" placeholder="SELECT id, a... ${$tbl_area}" />
-            <marker date="1451664466209" expanded="true" signature="1884:1960" placeholder="SELECT id, n... users" />
-            <marker date="1451664466209" expanded="true" signature="6949:6982" placeholder="SELECT * FRO... codes" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/config.inc.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="19.258064">
-          <caret line="17" column="11" selection-start-line="17" selection-start-column="11" selection-end-line="17" selection-end-column="11" />
-          <folding>
-            <marker date="1452279569281" expanded="true" signature="4670:4781" placeholder="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-10.645162">
-          <caret line="15" column="8" selection-start-line="15" selection-start-column="8" selection-end-line="15" selection-end-column="51" />
-          <folding>
-            <element signature="e#6#88#0#PHP" expanded="true" />
-            <marker date="1452279764879" expanded="true" signature="556:596" placeholder="SELECT DISTI... users" />
-            <marker date="1452279764879" expanded="true" signature="906:967" placeholder="SELECT * FRO... users" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/report.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.7096774">
+        <state vertical-scroll-proportion="0.0">
           <caret line="1455" column="10" selection-start-line="1455" selection-start-column="10" selection-end-line="1455" selection-end-column="10" />
           <folding>
             <marker date="1451888901038" expanded="true" signature="1454:1483" placeholder="..." />
@@ -2102,6 +2060,7 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/mysqli.inc">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-337.80646">
@@ -2184,16 +2143,24 @@
             <marker date="1452275999114" expanded="true" signature="50125:50276" placeholder="..." />
             <marker date="1452275999114" expanded="true" signature="50203:50265" placeholder="..." />
           </folding>
+=======
+    <entry file="file://$PROJECT_DIR$/config.inc.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="58" column="22" selection-start-line="58" selection-start-column="22" selection-end-line="58" selection-end-column="22" />
+          <folding />
+>>>>>>> parent of 98e1dbc... before reverting commit
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/temp.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.49896908">
-          <caret line="111" column="49" selection-start-line="111" selection-start-column="49" selection-end-line="111" selection-end-column="49" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#6#109#0#PHP" expanded="true" />
             <element signature="n#get_main_column_width#0;n#!!top" expanded="false" />
+            <element signature="n#time_cell_html#0;n#!!top" expanded="false" />
             <element signature="n#get_n_time_slots#0;n#!!top" expanded="false" />
             <element signature="e#44098#44586#0#PHP" expanded="false" />
             <element signature="e#44175#44540#0#PHP" expanded="false" />
@@ -2205,6 +2172,7 @@
             <element signature="e#45658#45815#0#PHP" expanded="false" />
             <element signature="e#45816#46102#0#PHP" expanded="false" />
             <element signature="e#46103#48180#0#PHP" expanded="false" />
+<<<<<<< HEAD
 <<<<<<< HEAD
             <marker date="1452275999114" expanded="true" signature="27848:27944" placeholder="SELECT COUNT... users" />
             <marker date="1452275999114" expanded="true" signature="31253:31501" placeholder="SELECT user,... times" />
@@ -2222,6 +2190,8 @@
             <marker date="1452275999114" expanded="true" signature="50125:50276" placeholder="..." />
             <marker date="1452275999114" expanded="true" signature="50203:50265" placeholder="..." />
 =======
+=======
+>>>>>>> parent of 98e1dbc... before reverting commit
             <marker date="1451605487982" expanded="true" signature="27848:27944" placeholder="SELECT COUNT... users" />
             <marker date="1451605487982" expanded="true" signature="31253:31501" placeholder="SELECT user,... times" />
             <marker date="1451605487982" expanded="true" signature="34111:34132" placeholder="..." />
@@ -2241,6 +2211,7 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/report2.php">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -2277,10 +2248,26 @@
             <marker date="1451664690311" expanded="true" signature="910:1019" placeholder="INSERT INTO users... " />
             <marker date="1451664690311" expanded="true" signature="1576:1585" placeholder="SELECT COUNT... codes" />
             <marker date="1451664690311" expanded="true" signature="1587:1767" placeholder="INSERT INTO codes... " />
+=======
+    <entry file="file://$PROJECT_DIR$/PEAR.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.50881314">
+          <caret line="1081" column="0" selection-start-line="1046" selection-start-column="0" selection-end-line="1085" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-16.32258">
+          <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
+          <folding>
+            <element signature="e#6#88#0#PHP" expanded="true" />
+>>>>>>> parent of 98e1dbc... before reverting commit
           </folding>
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/report.php">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.91549295">
@@ -2291,6 +2278,24 @@
             <marker date="1451699097334" expanded="true" signature="30349:30402" placeholder="SELECT COUNT... ${$tbl_area}" />
             <marker date="1451699097334" expanded="true" signature="30445:30499" placeholder="SELECT COUNT... ${$tbl_area}" />
 >>>>>>> parent of 76de590... Last MySQL version
+=======
+    <entry file="file://$PROJECT_DIR$/dbsys.inc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="5" />
+          <folding>
+            <element signature="e#16795#16892#0#PHP" expanded="false" />
+            <element signature="e#17808#20076#0#PHP" expanded="false" />
+            <element signature="e#18484#19393#0#PHP" expanded="false" />
+            <element signature="e#18653#19389#0#PHP" expanded="false" />
+            <element signature="e#18935#19389#0#PHP" expanded="false" />
+            <element signature="e#19444#19602#0#PHP" expanded="false" />
+            <element signature="e#19634#19822#0#PHP" expanded="false" />
+            <element signature="e#19914#19990#0#PHP" expanded="false" />
+            <element signature="e#20211#20637#0#PHP" expanded="false" />
+            <element signature="e#20395#20635#0#PHP" expanded="false" />
+            <element signature="e#20435#20631#0#PHP" expanded="false" />
+>>>>>>> parent of 98e1dbc... before reverting commit
           </folding>
         </state>
       </provider>

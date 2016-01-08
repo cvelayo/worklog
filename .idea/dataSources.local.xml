@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="dataSourceStorageLocal">
-    <data-source name="SQL Server (Microsoft) - worklog@localhost" uuid="c7216c38-e399-40ad-87fc-0492f697ee66">
-      <secret-storage>master_key</secret-storage>
-      <user-name>worklog</user-name>
-      <schema-pattern>worklog.*</schema-pattern>
-      <default-schemas>worklog.*</default-schemas>
-    </data-source>
+    <data-source name="MySQL - worklog@localhost" uuid="80b7dc88-167c-4c3b-b8a4-25f62d0c3984" />
   </component>
 </project>

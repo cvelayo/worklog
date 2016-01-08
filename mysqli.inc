@@ -623,20 +623,20 @@ function sql_mysqli_default_connect()
   }
 
   $port = NULL;
-  $connectionInfo = array("UID" => $db_login, "PWD" => $db_password, "Database"=>$db_database);
   // If a port is specified, cast it to int as mysqli doesn't accept
   // a string port specifier
   if (isset($db_port))
   {
     $port = (int)$db_port;
   }
-  $sql_mysqli_conn = sqlsrv_connect( $db_host, $connectionInfo);
+  $sql_mysqli_conn = sql_mysqli_connect($db_host, $db_login, $db_password,
+                                        $db_database, $persist, $port);
 }
 
 
 // Close a connection
 function sql_mysqli_close($connection)
 {
-  sql_close($connection);
+  mysqli_close($connection);
 }
 

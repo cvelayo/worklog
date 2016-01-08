@@ -1217,12 +1217,12 @@ function get_area_name($user, $all=FALSE)
     return $result;
 }*/
 $user = $_GET['user'];
-//print_header($day, $month, $year, $user);
+print_header($day, $month, $year, $user);
 echo "<div id=\"dwm_header\" class=\"screenonly\">\n";
-//echo make_area_select_html('temp.php', $user, $year, $month, $day);
+echo make_area_select_html('temp.php', $user, $year, $month, $day);
 if (!$display_calendar_bottom)
 {
-   // minicals($year, $month, $day, $area, $room, 'temp', $user);
+    minicals($year, $month, $day, $area, $room, 'temp', $user);
 }
 
 echo "</div>\n";
@@ -1230,21 +1230,21 @@ if (!isset($_GET['user'])){
     echo '<h1>Select your log</h1>';
     $sql = "SELECT DISTINCT team
          FROM users";
-$result = sqlsrv_query($sql_mysqli_conn, $sql);
+$result = $sql_mysqli_conn -> query($sql);
 
-    while($row = sqlsrv_fetch_array($result)){
+    while($row = $result->fetch_assoc()){
         $team = $row['team'];
         if ($team != 'test'){
         echo '<h2>' . $team . '</h2>';
         $sql2 = "SELECT * FROM users WHERE team ='" . $team . "' ORDER BY name  ";
 
-        $result2 = sqlsrv_query($sql_mysqli_conn, $sql2);
-        while ($row2 = sqlsrv_fetch_array($result2)) {
+        $result2 = $sql_mysqli_conn -> query($sql2);
+        while ($row2 = $result2->fetch_assoc()) {
             echo '<a href="temp.php?user=' . $row2['code'] . '">' . $row2['name'] . '</a><br />';
         }}
     }
-    sqlsrv_free_stmt($result);
-    sqlsrv_free_stmt($result2);
+    $result -> free();
+    $result2 -> free();
 } else {
 
     $timetohighlight = get_form_var('timetohighlight', 'int');
@@ -1296,10 +1296,10 @@ $result = sqlsrv_query($sql_mysqli_conn, $sql);
 // Draw the three month calendars
     if ($display_calendar_bottom)
     {
-        //minicals($year, $month, $day, $area, $room, 'temp', $user);
+        minicals($year, $month, $day, $area, $room, 'temp', $user);
     }
 
-    //output_trailer();
+    output_trailer();
 }
 
 ?>
