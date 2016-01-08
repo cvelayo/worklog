@@ -797,6 +797,7 @@ function db_get_userpass()
 $f = "sql_${dbsys}_default_connect";
 $f();
 
+
 // Sanity check:  check that we can access the MRBS tables.  If we can't, it's
 // either because they don't exist or we don't have permission.
 if (!sql_table_exists($tbl_entry))
