@@ -1484,11 +1484,7 @@ if ($phase == 2)
 
         }
         var_dump($hours);
-        echo "Social Work face to face hours: " . array_sum($hours['f2f']['SW'])/3600 . " hours.";
-        $team = array('SW', 'Psychology', 'C4C');
-        foreach ($team as $key)
-        {
-          echo ($hours['f2f'][$key]['intern'])/3600 . " hours";}
+        echo array_sum(array_column($hours['f2f']['SW'], 'staff'));
         do_summary($count, $hours, $room_hash, $name_hash);
       }
       else
