@@ -1,8 +1,19 @@
 <?php
 // $Id$
 
-require "defaultincludes.inc";
-require_once "mrbs_sql.inc";
+//require "defaultincludes.inc";
+//require_once "mrbs_sql.inc";
+require "connection.php";
+require "grab_globals.inc.php";
+require "systemdefaults.inc.php";
+require "areadefaults.inc.php";
+require "config.inc.php";
+require "internalconfig.inc.php";
+require "wfunctions.inc";
+require "wdb.inc";
+require "standard_vars.inc.php";
+require_once "mincals.inc";
+require "trailer.inc";
 require_once "functions_view.inc";
 
 // Generates a single button
@@ -16,7 +27,7 @@ function generateButton($form_action, $id, $series, $action_type, $returl, $subm
   echo "<input type=\"hidden\" name=\"returl\" value=\"" . htmlspecialchars($returl) . "\">\n";
   echo "<input type=\"submit\" title=\"" . htmlspecialchars($title) . "\" value=\"$submit_value\">\n";
   echo "</fieldset>\n";
-  echo "</form>\n";  
+  echo "</form>\n";
 }
 
 // Generates the Approve, Reject and More Info buttons
@@ -24,10 +35,10 @@ function generateApproveButtons($id, $series)
 {
   global $returl, $PHP_SELF;
   global $entry_info_time, $entry_info_user, $repeat_info_time, $repeat_info_user;
-  
+
   $info_time = ($series) ? $repeat_info_time : $entry_info_time;
   $info_user = ($series) ? $repeat_info_user : $entry_info_user;
-  
+
   $this_page = this_page();
   if (empty($info_time))
   {
@@ -41,7 +52,7 @@ function generateApproveButtons($id, $series)
       $info_title .= " " . get_vocab("by") . " $info_user";
     }
   }
-  
+
   echo "<tr>\n";
   echo "<td>" . ($series ? get_vocab("series") : get_vocab("entry")) . ":</td>\n";
   echo "<td>\n";
@@ -56,14 +67,14 @@ function generateOwnerButtons($id, $series)
 {
   global $user, $create_by, $status, $area;
   global $PHP_SELF, $reminders_enabled, $last_reminded, $reminder_interval;
-  
+
   $this_page = this_page();
-  
+
   // Remind button if you're the owner AND there's a booking awaiting
   // approval AND sufficient time has passed since the last reminder
   // AND we want reminders in the first place
   if (($reminders_enabled) &&
-      ($user == $create_by) && 
+      ($user == $create_by) &&
       ($status & STATUS_AWAITING_APPROVAL) &&
       (working_time_diff(time(), $last_reminded) >= $reminder_interval))
   {
@@ -73,7 +84,7 @@ function generateOwnerButtons($id, $series)
     generateButton("approve_entry_handler.php", $id, $series, "remind", $this_page . "?id=$id&amp;area=$area", get_vocab("remind_admin"));
     echo "</td>\n";
     echo "</tr>\n";
-  } 
+  }
 }
 
 function generateTextArea($form_action, $id, $series, $action_type, $returl, $submit_value, $caption, $value='')
@@ -100,7 +111,7 @@ function generateTextArea($form_action, $id, $series, $action_type, $returl, $su
 
 // Get non-standard form variables
 //
-// If $series is TRUE, it means that the $id is the id of an 
+// If $series is TRUE, it means that the $id is the id of an
 // entry in the repeat table.  Otherwise it's from the entry table.
 $id = get_form_var('id', 'int');
 $user = get_form_var('user', 'string');
@@ -142,7 +153,7 @@ $keep_private = (is_private_event($private) && !$writeable);*/
 // Work out when the last reminder was sent
 $last_reminded = (empty($row['reminded'])) ? $row['last_updated'] : $row['reminded'];
 
-
+$tbl_entry = 'times';
 if ($series == 1)
 {
   $repeat_id = $id;  // Save the repeat_id
@@ -151,12 +162,11 @@ if ($series == 1)
   // edit_entry.php
   // So I will look for the first entry in the series where the entry is
   // as per the original series settings
-  $sql = "SELECT id
+  $sql = "SELECT TOP 1 id
           FROM $tbl_entry
           WHERE repeat_id=$id AND entry_type=" . ENTRY_RPT_ORIGINAL . "
-          ORDER BY start_time
-          LIMIT 1";
-  $id = sql_query1($sql);
+          ORDER BY start_time";
+  $id = sql_mysql_query1($sql);
   if ($id < 1)
   {
     // if all entries in series have been modified then
@@ -165,12 +175,11 @@ if ($series == 1)
     // hopefully this code will never be reached as
     // this page will display the start time of the series
     // but edit_entry.php will display the start time of the entry
-    $sql = "SELECT id
+    $sql = "SELECT TOP 1 id
             FROM $tbl_entry
             WHERE repeat_id=$id
-            ORDER BY start_time
-            LIMIT 1";
-    $id = sql_query1($sql);
+            ORDER BY start_time";
+    $id = sql_mysql_query1($sql);
   }
   $repeat_info_time = $row['repeat_info_time'];
   $repeat_info_user = $row['repeat_info_user'];
@@ -179,12 +188,11 @@ if ($series == 1)
 else
 {
   $repeat_id = $row['repeat_id'];
-  
+
   $entry_info_time = $row['entry_info_time'];
   $entry_info_user = $row['entry_info_user'];
   $entry_info_text = $row['entry_info_text'];
 }
-
 
 // PHASE 2 - EXPORTING ICALENDAR FILES
 // -------------------------------------
@@ -199,7 +207,7 @@ if (isset($action) && ($action == "export"))
     exit;
   }
   else
-  {    
+  {
     // Construct the SQL query
     $sql = "SELECT E.*, "
          .  sql_syntax_timestamp_to_unix("E.timestamp") . " AS last_updated, "
@@ -221,10 +229,10 @@ if (isset($action) && ($action == "export"))
     {
       $sql .= " WHERE E.id=$id";
     }
-    
+
     $sql .= " AND E.room_id=R.id
               AND R.area_id=A.id";
-              
+
     if ($series)
     {
       $sql .= " ORDER BY E.ical_recur_id";
@@ -235,7 +243,7 @@ if (isset($action) && ($action == "export"))
       trigger_error(sql_error(), E_USER_WARNING);
       fatal_error(FALSE, get_vocab("fatal_db_error"));
     }
-    
+
     // Export the calendar
     require_once "functions_ical.inc";
     header("Content-Type: application/ics;  charset=" . get_charset(). "; name=\"" . $mail_settings['ics_filename'] . ".ics\"");
@@ -291,13 +299,14 @@ else
 
 // Now that we know all the data we start drawing it
 
+
 echo "<h3" . (($keep_private && $is_private_field['entry.name']) ? " class=\"private\"" : "") . ">\n";
 echo ($keep_private && $is_private_field['entry.name']) ? "[" . get_vocab("unavailable") . "]" : htmlspecialchars($row['name']);
-if (is_private_event($private) && $writeable) 
+/*if (is_private_event($private) && $writeable)
 {
   echo ' ('.get_vocab("unavailable").')';
-}
-echo "</h3>\n";
+}*/
+echo "View Entry</h3>\n";
 
 
 echo "<table id=\"entry\">\n";
@@ -334,7 +343,7 @@ if ($approval_enabled && !$room_disabled && ($status & STATUS_AWAITING_APPROVAL)
     $info_time = ($series) ? $repeat_info_time : $entry_info_time;
     $info_user = ($series) ? $repeat_info_user : $entry_info_user;
     $info_text = ($series) ? $repeat_info_text : $entry_info_text;
-    
+
     if (empty($info_time))
     {
       $value = '';
@@ -368,7 +377,7 @@ if ($approval_enabled && !$room_disabled && ($status & STATUS_AWAITING_APPROVAL)
       if (!empty($repeat_id) || $series)
       {
         generateApproveButtons($repeat_id, TRUE);
-      }    
+      }
     }
     // Buttons for the owner of this booking
     elseif ($user == $create_by)
@@ -430,7 +439,7 @@ echo create_details_body($row, TRUE, $keep_private, $room_disabled);
     echo "</div>\n";
   }
   
-  // Copy and Copy Series
+/*  // Copy and Copy Series
   echo "<div>\n";
   if (!$series)
   {
@@ -467,7 +476,7 @@ echo create_details_body($row, TRUE, $keep_private, $room_disabled);
     }
     echo "</div>\n";
   }
-  ?>
+  */?>
   <div id="returl">
     <?php
     if (isset($HTTP_REFERER)) //remove the link if displayed from an email

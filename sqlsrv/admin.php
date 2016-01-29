@@ -2,7 +2,17 @@
 
 // $Id$
 
-require "defaultincludes.inc";
+require "connection.php";
+require "grab_globals.inc.php";
+require "systemdefaults.inc.php";
+require "areadefaults.inc.php";
+require "config.inc.php";
+require "internalconfig.inc.php";
+require "wfunctions.inc";
+require "wdb.inc";
+require "standard_vars.inc.php";
+require_once "mincals.inc";
+require "trailer.inc";
 
 // Get non-standard form variables
 $user_name = get_form_var('name', 'string');
@@ -86,7 +96,7 @@ else
   // admin whether any areas are enabled)
   $areas = array();
   $n_displayable_areas = 0;
-  for ($i = 0; ($row = sql_row_keyed($res, $i)); $i++)
+  for ($i = 0; ($row = sql_mysqli_row_keyed($res, $i)); $i++)
   {
     $areas[] = $row;
     if ($is_admin || !$row['disabled'])
@@ -107,6 +117,7 @@ else
     // The area selector
     echo "<label id=\"area_label\" for=\"area_select\">" . get_vocab("area") . ":</label>\n";
     echo "<select class=\"room_area_select\" id=\"area_select\" name=\"user\" onchange=\"this.form.submit()\">";
+
     $is_admin =1;
     if ($is_admin)
     {
@@ -248,7 +259,7 @@ if ($is_admin)
       // admin whether any rooms are enabled)
       $rooms = array();
       $n_displayable_rooms = 0;
-      for ($i = 0; ($row = sql_row_keyed($res, $i)); $i++)
+      for ($i = 0; ($row = sql_mysqli_row_keyed($res, $i)); $i++)
       {
         $rooms[] = $row;
         if ($is_admin || !$row['disabled'])

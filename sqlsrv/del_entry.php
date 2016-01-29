@@ -8,9 +8,19 @@
 // means that $id is the id of an entry in the repeat table.   This
 // should be fixed sometime.]
 
-require "defaultincludes.inc";
-require_once "mrbs_sql.inc";
-
+/*require "defaultincludes.inc";
+require_once "mrbs_sql.inc";*/
+require "connection.php";
+require "grab_globals.inc.php";
+require "systemdefaults.inc.php";
+require "areadefaults.inc.php";
+require "config.inc.php";
+require "internalconfig.inc.php";
+require "wfunctions.inc";
+require "wdb.inc";
+require "standard_vars.inc.php";
+require_once "mincals.inc";
+require "trailer.inc";
 // Get non-standard form variables
 $id = get_form_var('id', 'int');
 $series = get_form_var('series', 'int');
@@ -19,7 +29,7 @@ $action = get_form_var('action', 'string');
 $note = get_form_var('note', 'string', '');
 
 // Check the user is authorised for this page
-checkAuthorised();
+//checkAuthorised();
 
 if (empty($returl))
 {
@@ -32,35 +42,36 @@ if (empty($returl))
       $returl = "week.php";
       break;
     default:
-      $returl = "day.php";
+      $returl = "test.php";
   }
   $returl .= "?year=$year&month=$month&day=$day&area=$area";
 }
 
 if ($info = get_booking_info($id, FALSE, TRUE))
 {
-  $user = getUserName();
+  //$user = getUserName();
   // check that the user is allowed to delete this entry
-  if (isset($action) && ($action="reject"))
+/*  if (isset($action) && ($action="reject"))
   {
     $authorised = auth_book_admin($user, $info['room_id']);
   }
   else
   {
     $authorised = getWritable($info['create_by'], $user, $info['room_id']);
-  }
+  }*/
+  $authorised = 1;
   if ($authorised)
   {
     $day   = strftime("%d", $info["start_time"]);
     $month = strftime("%m", $info["start_time"]);
     $year  = strftime("%Y", $info["start_time"]);
-    $area  = mrbsGetRoomArea($info["room_id"]);
+    //$area  = mrbsGetRoomArea($info["room_id"]);
     // Get the settings for this area (they will be needed for policy checking)
-    get_area_settings($area);
+    //get_area_settings($area);
     
-    $notify_by_email = $mail_settings['on_delete'] && $need_to_send_mail;
+    //$notify_by_email = $mail_settings['on_delete'] && $need_to_send_mail;
 
-    if ($notify_by_email)
+    /*if ($notify_by_email)
     {
       require_once "functions_mail.inc";
       // Gather all fields values for use in emails.
@@ -72,10 +83,13 @@ if ($info = get_booking_info($id, FALSE, TRUE))
       {
         $mail_previous['entry_type'] = ENTRY_RPT_CHANGED;
       }
-    }
-    sql_begin();
-    $start_times = mrbsDelEntry(getUserName(), $id, $series, 1);
-    sql_commit();
+    }*/
+
+
+    sqlsrv_begin_transaction($conn);
+
+    $start_times = mrbsDelEntry('test', $id, $series, 1);
+    sqlsrv_commit($conn);
     // [At the moment MRBS does not inform the user if it was not able to delete
     // an entry, or, for a series, some entries in a series.  This could happen for
     // example if a booking policy is in force that prevents the deletion of entries

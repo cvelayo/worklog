@@ -369,6 +369,7 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
     // When checking for overlaps, for Edit (not New), ignore this entry and series:
     if (isset($id))
     {
+
         $ignore_id = $id;
         $repeat_id = get_repeat_id($id);
     }
@@ -482,7 +483,8 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
 
         foreach ($old_bookings as $old_booking)
         {
-            $errors = 0;//mrbsCheckPolicy($old_booking, FALSE, FALSE, TRUE);
+            $errors = array();
+            //mrbsCheckPolicy($old_booking, FALSE, FALSE, TRUE);
             if (count($errors) > 0)
             {
                 $valid_booking = FALSE;
@@ -512,6 +514,7 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
     {
         $rooms[] = $booking['room_id'];
     }
+
     foreach ($bookings as $booking)
     {
         // We need to work out whether this is the original booking being modified,
@@ -541,9 +544,10 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
             // This is a new booking.   We generate a new ical_uid and start
             // the sequence at 0 - unless there already are uid and sequence
             // numbers, for example when importing an iCalendar file
+
             if (empty($booking['ical_uid']))
             {
-                $booking['ical_uid'] = generate_global_uid($booking['name']);
+                //$booking['ical_uid'] = generate_global_uid($booking['name']);
             }
             if (empty($booking['ical_sequence']))
             {
@@ -580,6 +584,7 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
             $is_repeat_table = FALSE;
             $result['start_times'] = array($booking['start_time']);
         }
+        echo $new_id;
         $new_details[] = array('id' => $new_id, 'room_id' => $booking['room_id']);
         $booking['id'] = $new_id;  // Add in the id now we know it
 
@@ -602,7 +607,7 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
                    WHERE R.id=${booking['room_id']} AND R.area_id = A.id
                    LIMIT 1";
                     $res = sql_query($sql);
-                    $row = sql_row_keyed($res, 0);
+                    $row = sql_mysqli_row_keyed($res, 0);
                     $booking['room_name'] = $row['room_name'];
                     $booking['area_name'] = $row['area_name'];
                 }
@@ -629,11 +634,10 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
         }
     } // end foreach $bookings
 
-    sql_mutex_unlock("$tbl_entry");
+    //sql_mutex_unlock("$tbl_entry");
 
     $result['new_details'] = $new_details;
     $result['slots'] = intval(($common['end_time'] - $common['start_time'])/$resolution);
-
     return $result;
 }
 
@@ -1083,54 +1087,318 @@ function mrbsCreateEntry($table, $data)
 
     $sql_col = array_map('sql_quote', $sql_col);
     $sql = "INSERT INTO $table (" . implode(', ', $sql_col) . ") VALUES (" . implode(', ',$sql_val) . ")";
-    if (sql_command($sql) < 0)
+    $sql .= "; SELECT SCOPE_IDENTITY() AS IDENTITY_COLUMN_NAME";
+    $res = sql_query($sql);
+    $ret = sqlsrv_rows_affected($res);
+    if ($ret < 0)
     {
         // probably because the table hasn't been created properly
         trigger_error(sql_error(), E_USER_WARNING);
         fatal_error(TRUE, get_vocab("fatal_db_error"));
     }
 
-    return sql_insert_id($table, "id");
+    return lastInsertID($res);
 }
 
 // Escapes special characters in a string for use in an SQL statement
 function sql_escape($str)
 {
-    if (func_num_args() > 1)
-    {
-        $handle = func_get_arg(1);
-        $db_sys = $handle['system'];
-        $db_conn = $handle['connection'];
-    }
-    else
-    {
-        global $dbsys;
-
-        $db_sys = $dbsys;
-        $db_conn = null;
-    }
-
-    $f = "sql_${db_sys}_escape";
-    return $f($str, $db_conn);
+    return $str;
 }
 
 // Run an SQL query that doesn't produce results
 function sql_command($sql)
 {
-    if (func_num_args() > 1)
+    $ret = -1;
+    $res = sql_query($sql);
+    if ($res)
     {
-        $handle = func_get_arg(1);
-        $db_sys = $handle['system'];
-        $db_conn = $handle['connection'];
+        $ret = sqlsrv_rows_affected($res);
+    }
+    return $ret;
+}
+
+// SQL server function to get last inserted ID
+function lastInsertID($queryID)
+{
+    sqlsrv_next_result($queryID);
+    sqlsrv_fetch($queryID);
+    return sqlsrv_get_field($queryID, 0);
+}
+
+// Returns the results in an array with keys the same as the table
+// field names.  In the event of an error stops with a fatal error,
+// unless $silent is TRUE, when it returns FALSE.
+function get_booking_info($id, $series, $silent=FALSE)
+{
+    global $tbl_entry, $tbl_repeat, $tbl_room, $tbl_area;
+    $tbl_entry = 'times';
+    $tbl_repeat= 'repeats';
+    // Check that we've got an id
+    if (!isset($id))
+    {
+        trigger_error("id not set", E_USER_WARNING);
+        if ($silent)
+        {
+            return FALSE;
+        }
+        else
+        {
+            fatal_error(TRUE, ($series ? get_vocab("invalid_series_id") : get_vocab("invalid_entry_id")));
+        }
+    }
+
+    $table = ($series) ? $tbl_repeat : $tbl_entry;
+    $table_fields = sql_field_info($table);
+    // Build an array of the field names in the repeat table so that
+    // we'll be able to do some sanity checking later
+    $repeat_fields = sql_field_info($tbl_repeat);
+    $rep_fields = array();
+    foreach ($repeat_fields as $field)
+    {
+        $rep_fields[$field['name']] = 1;
+    }
+
+    $terms = array("(end_time - start_time) AS duration");
+
+    foreach ($table_fields as $field)
+    {
+        switch ($field['name'])
+        {
+            // these fields only exist in the entry table
+            case 'entry_type':
+            case 'repeat_id':
+            case 'ical_recur_id':
+                array_push($terms, $field['name']);
+                break;
+
+            case 'info_time':
+            case 'info_user':
+            case 'info_text':
+                if ($series)
+                {
+                    array_push($terms, $field['name']);
+                }
+                else
+                {
+                    array_push($terms, $field['name']);
+                }
+                break;
+
+            default:
+                // These are (a) all the standard fields which are common to the entry
+                // and repeat tables and (b) all the custom fields, which should be
+                // common to the two tables (we will do a check to make sure)
+                if (!$series && !array_key_exists($field['name'], $rep_fields))
+                {
+                    // If this is the entry table then check that the custom field also
+                    // exists in the repeat table
+                    fatal_error(0, "Custom fields problem, '".$field['name']."' exists in entry table but not in repeat table");
+                }
+
+                array_push($terms, $field['name']);
+                break;
+        }
+    }
+    $sql = "SELECT " . implode(", ",$terms)."
+            FROM $table
+             WHERE id=$id";
+    $res = sql_query($sql);
+    if (! $res)
+    {
+        trigger_error(sql_error(), E_USER_WARNING);
+        if ($silent)
+        {
+            return FALSE;
+        }
+        else
+        {
+            fatal_error(FALSE, get_vocab("fatal_db_error"));
+        }
+    }
+
+    if (sql_count($res) < 1)
+    {
+        // It's quite possible that the id will have disappeared, eg if somebody
+        // else has deleted or edited the entry, or if the back button is pressed
+        // after deleting an entry.
+        if ($silent)
+        {
+            return FALSE;
+        }
+        else
+        {
+            fatal_error(TRUE, ($series ? get_vocab("invalid_series_id") : get_vocab("invalid_entry_id")));
+        }
+    }
+
+    $row = sql_mysqli_row_keyed($res, 0);
+    sqlsrv_free_stmt($res);
+
+    // Now get the duration.
+    // Don't translate the units at this stage.   We'll translate them later.
+    $d = get_duration($row['start_time'], $row['end_time'], $row['enable_periods'], FALSE);
+    $row['duration'] = $d['duration'];
+    $row['dur_units'] = $d['dur_units'];
+    // Get some extra information
+    if ($series)
+    {
+        $row['entry_info_time'] = '';
+        $row['entry_info_user'] = '';
+        $row['entry_info_text'] = '';
     }
     else
     {
-        global $dbsys;
-
-        $db_sys = $dbsys;
-        $db_conn = null;
+        // Get the repeat information
+        if (!isset($row['repeat_id']))
+        {
+            $row['rep_type'] = REP_NONE;   // just as a precaution
+            $row['repeat_info_time'] = '';
+            $row['repeat_info_user'] = '';
+            $row['repeat_info_text'] = '';
+        }
+        else
+        {
+            $res = sql_query("SELECT TOP 1 rep_type, end_date, rep_opt, rep_num_weeks, month_absolute, month_relative,
+                        info_time AS repeat_info_time, info_user AS repeat_info_user, info_text AS repeat_info_text
+                        FROM $tbl_repeat WHERE id=${row['repeat_id']}");
+            if (!$res || (!$extra_row = sql_mysqli_row_keyed($res, 0)))
+            {
+                if (!$res)
+                {
+                    trigger_error(sql_error(), E_USER_WARNING);
+                }
+                if ($silent)
+                {
+                    return FALSE;
+                }
+                else
+                {
+                    fatal_error(TRUE, get_vocab("invalid_series_id"));
+                }
+            }
+            $row['rep_type']         = $extra_row['rep_type'];
+            $row['end_date']         = $extra_row['end_date'];
+            $row['rep_opt']          = $extra_row['rep_opt'];
+            $row['rep_num_weeks']    = $extra_row['rep_num_weeks'];
+            $row['month_absolute']   = $extra_row['month_absolute'];
+            $row['month_relative']   = $extra_row['month_relative'];
+            $row['repeat_info_time'] = $extra_row['repeat_info_time'];
+            $row['repeat_info_user'] = $extra_row['repeat_info_user'];
+            $row['repeat_info_text'] = $extra_row['repeat_info_text'];
+            sql_free($res);
+        }
     }
 
-    $f = "sql_${db_sys}_command";
-    return $f($sql, $db_conn);
+    return $row;
 }
+
+// Gets the repeat_id for an entry in the entry table with id $entry_id
+// Returns the repeat_id or NULL
+function get_repeat_id($entry_id)
+{
+    global $tbl_entry;
+    $tbl_entry = 'times';
+
+    $sql = "SELECT TOP 1 repeat_id
+            FROM $tbl_entry
+           WHERE id=$entry_id";
+    $res = sql_query($sql);
+
+    if ($res === FALSE)
+    {
+        trigger_error(sql_error(), E_USER_WARNING);
+        fatal_error(FALSE, get_vocab("fatal_db_error"));
+    }
+    if (sql_count($res) == 0)
+    {
+        // This should not happen
+        trigger_error('$entry_id=' . "$entry_id does not exist.", E_USER_NOTICE);
+        return NULL;
+    }
+    $row = sql_mysqli_row_keyed($res, 0);
+    return $row['repeat_id'];
+}
+
+/** mrbsDelEntry()
+ *
+ * Delete an entry, or optionally all entries.   Will also delete any newly
+ * orphaned rows in the repeat table.
+ *
+ * $user   - Who's making the request
+ * $id     - The entry to delete
+ * $series - If set, delete the series, except user modified entries
+ * $all    - If set, include user modified entries in the series delete
+ *
+ * Returns FALSE if an error occurred, otherwise an array of start_times that
+ * have been deleted.
+ *
+ */
+function mrbsDelEntry($user, $id, $series, $all)
+{
+    global $tbl_entry, $tbl_repeat;
+    $tbl_entry = 'times';
+    $tbl_repeat = 'repeats';
+    $start_times = array();
+
+    // Get the repeat_id and room_id for this entry
+    $res = sql_query("SELECT TOP 1 repeat_id, user FROM $tbl_entry WHERE id=$id");
+    if (($res === FALSE) || (sql_count($res) <= 0))
+    {
+        return FALSE;
+    }
+    $row = sql_mysqli_row_keyed($res, 0);
+    $repeat_id = $row['repeat_id'];
+    $sql = "SELECT start_time, end_time, id, type FROM $tbl_entry WHERE ";
+
+    if ($series)
+    {
+        $sql .= "repeat_id=$repeat_id";
+    }
+    else
+    {
+        $sql .= "id=$id";
+    }
+    $res = sql_query($sql);
+
+    for ($i = 0; ($row = sql_mysqli_row_keyed($res, $i)); $i++)
+    {
+        /*    if(!getWritable($row['create_by'], $user, $room_id))
+            {
+              continue;
+            }
+
+            if ($series && $row['entry_type'] == ENTRY_RPT_CHANGED && !$all)
+            {
+              continue;
+            }*/
+
+        // check that the booking policies allow us to delete this entry
+        /*$tmp = mrbsCheckPolicy($row, 0, 0, TRUE);
+        if (!empty($tmp))
+        {
+          continue;
+        }*/
+        if (sql_command("DELETE FROM $tbl_entry WHERE id=" . $id) > 0)
+        {
+            $start_times[] = $row['start_time'];
+        }
+    }
+
+    // Get rid of any orphaned rows in the repeat table
+    if (!empty($repeat_id) &&
+        sql_mysqli_query1("SELECT COUNT(*) FROM $tbl_entry WHERE repeat_id=$repeat_id") == 0)
+    {
+        sql_command("DELETE FROM $tbl_repeat WHERE id=$repeat_id");
+    }
+
+    asort($start_times);
+    return $start_times;
+}
+
+
+function sql_quote($identifier)
+{
+    return "[" . $identifier . "]";
+}
+

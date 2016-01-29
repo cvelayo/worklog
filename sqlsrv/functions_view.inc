@@ -42,8 +42,9 @@ function create_details_body($data, $as_html=FALSE, $keep_private=FALSE, $room_d
   global $strftime_format;
   global $tbl_entry;
   global $select_options;
-  $tbl_entry = times;
+  $tbl_entry = 'times';
   // Get the duration if we haven't got it already
+
   if (!isset($data['duration']))
   {
     // We will translate the units later
@@ -51,7 +52,7 @@ function create_details_body($data, $as_html=FALSE, $keep_private=FALSE, $room_d
     $data['duration'] = $d['duration'];
     $data['dur_units'] = $d['dur_units'];
   }
-  
+
   // Set a rep_type if it hasn't been
   if (!isset($data['rep_type']))
   {
@@ -95,7 +96,7 @@ function create_details_body($data, $as_html=FALSE, $keep_private=FALSE, $room_d
     }
   }
 
-  
+
   $tbody = '';
   $tbody .= ($as_html) ? "<tbody>\n" : "";
   // Description

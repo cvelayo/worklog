@@ -44,9 +44,19 @@
 // If MRBS can't find an entry for the field in the lang file or vocab overrides, then
 // it will use the fieldname, eg 'coffee_machine'.
 
-require "defaultincludes.inc";
-require_once "mrbs_sql.inc";
-
+/*require "defaultincludes.inc";
+require_once "mrbs_sql.inc";*/
+require "connection.php";
+require "grab_globals.inc.php";
+require "systemdefaults.inc.php";
+require "areadefaults.inc.php";
+require "config.inc.php";
+require "internalconfig.inc.php";
+require "wfunctions.inc";
+require "wdb.inc";
+require "standard_vars.inc.php";
+require_once "mincals.inc";
+require "trailer.inc";
 
 function create_field_entry_timezone()
 {
@@ -407,7 +417,7 @@ $custom_html = get_form_var('custom_html', 'string');  // Used for both area and
 $change_done = get_form_var('change_done', 'string');
 $change_room = get_form_var('change_room', 'string');
 $change_area = get_form_var('change_area', 'string');
-
+$tbl_room = 'users';
 // Get the max_per_interval form variables
 foreach ($interval_types as $interval_type)
 {
@@ -455,10 +465,10 @@ $is_admin = (authGetUserLevel($user) >= $required_level);*/
 // Done changing area or room information?
 if (isset($change_done))
 {
-  if (!empty($room)) // Get the area the room is in
+/*  if (!empty($room)) // Get the area the room is in
   {
     $area = mrbsGetRoomArea($room);
-  }
+  }*/
   Header("Location: admin.php?day=$day&month=$month&year=$year&area=$area");
   exit();
 }
@@ -508,20 +518,20 @@ $id = $_POST['id'];
     $room_admin_email = str_replace(',', ', ', $room_admin_email);
     // validate the email addresses
     $valid_email = validate_email_list($room_admin_email);*/
-  
+
     if (FALSE != $valid_email)
     {
-/*      if (empty($capacity))
+      if (empty($capacity))
       {
         $capacity = 0;
-      }*/
-    
+      }
+/*
       // Acquire a mutex to lock out others who might be deleting the new area
       if (!sql_mutex_lock("codes"))
       {
         fatal_error(TRUE, get_vocab("failed_to_acquire"));
       }
-/*      // Check the new area still exists
+      // Check the new area still exists
       if (sql_query1("SELECT COUNT(*) FROM $tbl_area WHERE id=$new_area LIMIT 1") < 1)
       {
         $valid_area = FALSE;
@@ -541,8 +551,7 @@ $id = $_POST['id'];
         $valid_room_name = FALSE;
       }*/
       // If everything is still OK, update the databasae
-      else
-      {
+
         // Convert booleans into 0/1 (necessary for PostgreSQL)
 /*        $room_disabled = (!empty($room_disabled)) ? 1 : 0;
         $sql = "UPDATE $tbl_room SET ";*/
@@ -602,11 +611,12 @@ $id = $_POST['id'];
             }
           }
         }
-        
+
         $sql .= implode(",", $assign_array) . " WHERE id=$room";*/
         $sql = "UPDATE codes
                 SET code = '$code', description = '$description', f2f= '$f2f', disabled = '$disabled', outreach='$outreach', available = '$available', dnka = '$dnka'
                 WHERE id = $id";
+
         if (sql_command($sql) < 0)
         {
           echo get_vocab("update_room_failed") . "<br>\n";
@@ -615,14 +625,14 @@ $id = $_POST['id'];
         }
         // if everything is OK, release the mutex and go back to
         // the admin page (for the new area)
-        sql_mutex_unlock("codes");
+        //sql_mutex_unlock("codes");
 
         Header("Location: admin.php?day=$day&month=$month&year=$year&success=1");
         exit();
-      }
+
     
       // Release the mutex
-      sql_mutex_unlock("codes");
+      //sql_mutex_unlock("codes");
     }
   }
 
@@ -876,16 +886,18 @@ if ($is_admin)
 // Non-admins will only be allowed to view room details, not change them
 $disabled = !$is_admin;
 $code = $_GET['code'];
+
 // THE ROOM FORM
 if (isset($change_room) && !empty($code))
 {
-  $res = sql_query("SELECT * FROM codes WHERE code='$code' LIMIT 1");
+  $res = sql_query("SELECT TOP 1 * FROM codes WHERE code='$code'");
   if (! $res)
   {
     fatal_error(0, get_vocab("error_room") . $room . get_vocab("not_found"));
   }
-  $row = sql_row_keyed($res, 0);
-  
+
+  $row = sql_mysqli_row_keyed($res, 0);
+
   echo "<h2>\n";
   echo ($is_admin) ? get_vocab("editroom") : get_vocab("viewroom");
   echo "</h2>\n";
@@ -1146,13 +1158,15 @@ if (isset($change_area) &&!empty($user))
     exit();
   }
   // Get the details for this area
-  $res = sql_query("SELECT * FROM users WHERE id=$user LIMIT 1");
+  $res = sql_query("SELECT TOP 1 * FROM [users] WHERE id=$user");
+
   if (! $res)
   {
+
     fatal_error(0, get_vocab("error_area") . $area . get_vocab("not_found"));
   }
-  $row = sql_row_keyed($res, 0);
-  sql_free($res);
+  $row = sql_mysqli_row_keyed($res, 0);
+  sqlsrv_free_stmt($res);
   // Get the settings for this area, from the database if they are there, otherwise from
   // the config file.    A little bit inefficient repeating the SQL query
   // we've just done, but it makes the code simpler and this page is not used very often.

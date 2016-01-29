@@ -3044,3 +3044,225 @@ function mrbs_ignore_user_abort($set)
         }
     }
 }
+
+// Get the duration of an interval given a start time and end time.  Corrects for
+// DST changes so that the duration is what the user would expect to see.  For
+// example 12 noon to 12 noon crossing a DST boundary is 24 hours.
+//
+// Returns an array indexed by 'duration' and 'dur_units'
+//
+//    $start_time     int     start time as a Unix timestamp
+//    $end_time       int     end time as a Unix timestamp
+//    $enable_periods boolean whether we are using periods
+//    $translate      boolean whether to translate into the browser language
+function get_duration($start_time, $end_time, $enable_periods, $translate=TRUE)
+{
+    global $periods;
+
+    $result = array();
+
+    if ($enable_periods)
+    {
+        $periods_per_day = count($periods);
+        $n_periods = get_period_interval($start_time, $end_time);  // this handles DST
+        if (($n_periods % $periods_per_day) == 0)
+        {
+            $result['duration'] =  intval($n_periods/$periods_per_day);
+            $result['dur_units'] = ($translate) ? get_vocab('days') : 'days';
+        }
+        else
+        {
+            $result['duration'] = $n_periods;
+            $result['dur_units'] = ($translate) ? get_vocab('periods') : 'periods';
+        }
+    }
+    else
+    {
+        $result['duration'] = $end_time - $start_time;
+        // Need to make DST correct in opposite direction to entry creation
+        // so that user see what he expects to see
+        $result['duration'] -= cross_dst($start_time, $end_time);
+        toTimeString($result['duration'], $result['dur_units'], $translate);
+    }
+    return $result;
+}
+
+// Gets the interval in periods for a booking with $start_time and $end_time
+// Takes account of DST
+function get_period_interval($start_time, $end_time)
+{
+    global $periods;
+
+    $periods_per_day = count($periods);
+
+    // Need to use the MRBS version of DateTime to get round a bug in modify()
+    // in PHP before 5.3.6
+    $startDate = new MRBS\DateTime();
+    $startDate->setTimestamp($start_time);
+    $endDate = new MRBS\DateTime();
+    $endDate->setTimestamp($end_time);
+
+    // Set both dates to noon so that we can compare them and get an integral
+    // number of days difference.  Noon also happens to be when periods start,
+    // so will be useful in a moment.
+    $startDate->modify('12:00');
+    $endDate->modify('12:00');
+
+    // Calculate the difference in days
+    $interval = $startDate->diff($endDate);
+    $interval_days = $interval->format('%a');
+
+    if ($interval_days == 0)
+    {
+        // If the interval starts and ends on the same day, the we just calculate the number
+        // of periods by calculating the number of minutes between the start and end times.
+        $result = ($end_time - $start_time)/60;
+    }
+    else
+    {
+        // Otherwise we calculate the number of periods on the first day
+        $startDate->add(new DateInterval('PT' . $periods_per_day . 'M'));
+        $result = get_period_interval($start_time, $startDate->getTimestamp());
+        // Add in the number of whole days worth of periods in between
+        $result += ($interval_days - 1) * $periods_per_day;
+        // And add in the number of periods on the last day
+        $result += get_period_interval($endDate->getTimestamp(), $end_time);
+    }
+
+    return (int)$result;
+}
+
+// If $time falls on a non-working day, shift it back to the end of the last
+// working day before that
+function shift_to_workday($time)
+{
+    global $working_days;
+
+    $dow = date('w', $time);  // get the day of the week
+    $skip_back = 0;           // number of days to skip back
+    // work out how many days to skip back to get to a working day
+    while (!in_array($dow, $working_days))
+    {
+        if ($skip_back == 7)
+        {
+            break;
+        }
+        $skip_back++;
+        $dow = ($dow + 6) % 7;  // equivalent to skipping back a day
+    }
+    if ($skip_back != 0)
+    {
+        // set the time to the end of the working day
+        $d = date('j', $time) - $skip_back;
+        $m = date('n', $time);
+        $y  = date('Y', $time);
+        $time = mktime(23, 59, 59, $m, $d, $y);
+    }
+    return $time;
+}
+
+// Returns the difference in seconds between two timestamps, $now and $then
+// It gives $now - $then, less any seconds that were part of a non-working day
+function working_time_diff($now, $then)
+{
+    global $working_days;
+
+    // Deal with the easy case
+    if ($now == $then)
+    {
+        return 0;
+    }
+    // Sanitise the $working_days array in case it was malformed
+    $working_week = array_unique(array_intersect(array(0,1,2,3,4,5,6), $working_days));
+    $n_working_days = count($working_week);
+    // Deal with the special case where there are no working days
+    if ($n_working_days == 0)
+    {
+        return 0;
+    }
+    // and the special case where there are no holidays
+    if ($n_working_days == 7)
+    {
+        return ($now - $then);
+    }
+
+    // For the rest we're going to assume that $last comes after $first
+    $last = max($now, $then);
+    $first = min($now, $then);
+
+    // first of all, if $last or $first fall on a non-working day, shift
+    // them back to the end of the last working day
+    $last = shift_to_workday($last);
+    $first = shift_to_workday($first);
+    // So calculate the difference
+    $diff = $last - $first;
+    // Then we have to deduct all the non-working days in between.   This will be
+    // (a) the number of non-working days in the whole weeks between them +
+    // (b) the number of non-working days in the part week
+
+    // First let's calculate (a)
+    $last = mktime(12, 0, 0, date('n', $last), date('j', $last), date('Y', $last));
+    $first = mktime(12, 0, 0, date('n', $first), date('j', $first), date('Y', $first));
+    $days_diff = (int) round(($last - $first)/SECONDS_PER_DAY);  // the difference in days
+    $whole_weeks = (int) floor($days_diff/7);  // the number of whole weeks between the two
+    $non_working_days = $whole_weeks * (7 - $n_working_days);
+    // Now (b), ie we just have to calculate how many non-working days there are between the two
+    // days of the week that are left
+    $last_dow = date('w', $last);
+    $first_dow = date('w', $first);
+
+    while ($first_dow != $last_dow)
+    {
+        $first_dow = ($first_dow + 1) % 7;
+        if (!in_array($first_dow, $working_week))
+        {
+            $non_working_days++;
+        }
+    }
+
+    // So now subtract the number of weekend seconds
+    $diff = $diff - ($non_working_days * SECONDS_PER_DAY);
+
+    // Finally reverse the difference if $now was in fact before $then
+    if ($now < $then)
+    {
+        $diff = -$diff;
+    }
+
+    return (int) $diff;
+}
+
+function time_date_string($t)
+{
+    global $twentyfourhour_format, $strftime_format;
+
+    if ($twentyfourhour_format)
+    {
+        return utf8_strftime($strftime_format['datetime24'], $t);
+    }
+    else
+    {
+        return utf8_strftime($strftime_format['datetime12'], $t);
+    }
+}
+
+// version of the standard PHP function nl2br() that takes account of the fact
+// that the optional second parameter is only available from PHP 5.3.0 onwards.
+function mrbs_nl2br($string)
+{
+    if (function_exists('version_compare') && version_compare(PHP_VERSION, '5.3.0', 'ge'))
+    {
+        return nl2br($string, IS_XHTML);
+    }
+    else
+    {
+        return nl2br($string);
+    }
+}
+
+function this_page()
+{
+    global $PHP_SELF;
+
+    return basename($PHP_SELF);
+}

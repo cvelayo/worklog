@@ -144,7 +144,7 @@ function genSlotSelector($area, $id, $name, $current_s, $display_none=FALSE, $di
   global $periods;
 
   $html = '';
-  $resolution = (30 * 60);
+  $resolution = (15 * 60);
   $morningstarts = 7;   // must be integer in range 0-23
   $morningstarts_minutes = 0;   // must be integer in range 0-59
   $eveningends = 18;  // must be integer in range 0-23
