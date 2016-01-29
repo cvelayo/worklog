@@ -2,8 +2,20 @@
 
 // $Id$
 
-require "defaultincludes.inc";
-require_once "mrbs_sql.inc";
+/*require "defaultincludes.inc";
+require_once "mrbs_sql.inc";*/
+
+require "connection.php";
+require "grab_globals.inc.php";
+require "systemdefaults.inc.php";
+require "areadefaults.inc.php";
+require "config.inc.php";
+require "internalconfig.inc.php";
+require "wfunctions.inc";
+require "wdb.inc";
+require "standard_vars.inc.php";
+require_once "mincals.inc";
+require "trailer.inc";
 
 // Get non-standard form variables
 $name = $_POST['name'];
@@ -27,7 +39,7 @@ if (!isset($code) || ($code === ''))
   $error = "empty_name";
 }
 
-elseif (sql_mysqli_query1("SELECT COUNT(*) FROM $table WHERE code = '$code'") > 0)
+elseif (sql_mysqli_query1("SELECT COUNT(*) FROM [$table] WHERE code = '$code'") > 0)
 {$error = "duplicate";}
 
 // we need to do different things depending on if its a room
@@ -35,19 +47,23 @@ elseif (sql_mysqli_query1("SELECT COUNT(*) FROM $table WHERE code = '$code'") > 
 elseif ($type == "area")
 {
   //$area = mrbsAddArea($name, $error);
-  $sql = "INSERT INTO users (name, code, team, role, disabled)
+  $sql = "INSERT INTO [users] (name, code, team, role, disabled)
           VALUES ('$name', '$code', '$team', '$role', 0)";
-  if (!sql_mutex_lock("users"))
+  $sql .= "; SELECT SCOPE_IDENTITY() AS IDENTITY_COLUMN_NAME";
+/*  if (!sql_mutex_lock("users"))
   {
     fatal_error(TRUE, get_vocab("failed_to_acquire"));
-  }
-  if (sql_command($sql) < 0)
+  }*/
+  $res = sql_query($sql);
+  $ret = sqlsrv_rows_affected($res);
+  if ($ret < 0)
   {
     trigger_error(sql_error(), E_USER_WARNING);
     fatal_error(TRUE, get_vocab("fatal_db_error"));
   }
-  $area = sql_insert_id('users', 'id');
-  sql_mutex_unlock("users");
+  $area = lastInsertID($res);
+  sqlsrv_free_stmt($res);
+  //sql_mutex_unlock("users");
 }
 
 elseif ($type == "room")
@@ -58,19 +74,25 @@ elseif ($type == "room")
   $dnka = $_POST['dnka'];
   $outreach = $_POST['outreach'];
   $nocount = $_POST['nocount'];
-  $sql = "INSERT INTO codes (code, description, f2f, available, dnka, outreach, nocount, disabled)
+  $sql = "INSERT INTO [codes] (code, description, f2f, available, dnka, outreach, nocount, disabled)
           VALUES ('$code', '$description', $f2f, $available, $dnka, $outreach, $nocount, 0)";
-  if (!sql_mutex_lock("users"))
+  $sql .= "; SELECT SCOPE_IDENTITY() AS IDENTITY_COLUMN_NAME";
+/*  if (!sql_mutex_lock("users"))
   {
     fatal_error(TRUE, get_vocab("failed_to_acquire"));
-  }
-  if (sql_command($sql) < 0)
+  }*/
+  $res = sql_query($sql);
+
+  $ret = sqlsrv_rows_affected($res);
+
+  if ($ret < 0)
   {
     trigger_error(sql_error(), E_USER_WARNING);
     fatal_error(TRUE, get_vocab("fatal_db_error"));
   }
-  $area = sql_insert_id('users', 'id');
-  sql_mutex_unlock("users");
+  $area = lastInsertID($res);
+  sqlsrv_free_stmt($res);
+  //sql_mutex_unlock("users");
 }
 
 $returl = "admin.php?success=".(isset($area) ? 1:0) . (!empty($error) ? "&error=$error" : "");

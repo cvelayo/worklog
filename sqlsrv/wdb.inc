@@ -61,7 +61,7 @@ function sql_mysqli_query1 ($sql, $db_conn = null)
     }
     else
     {
-        $result = $row;
+        $result = sqlsrv_get_field($r, 0);
     }
     sqlsrv_free_stmt($r);
     return $result;
