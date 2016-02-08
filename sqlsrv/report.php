@@ -1,8 +1,17 @@
 <?php
 // $Id$
 
-require "defaultincludes.inc";
-
+require "connection.php";
+require "grab_globals.inc.php";
+require "systemdefaults.inc.php";
+require "areadefaults.inc.php";
+require "config.inc.php";
+require "internalconfig.inc.php";
+require "wfunctions.inc";
+require "wdb.inc";
+require "standard_vars.inc.php";
+require_once "mincals.inc";
+require "trailer.inc";
 
 function generate_search_criteria(&$vars)
 {
