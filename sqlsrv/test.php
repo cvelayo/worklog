@@ -19,9 +19,7 @@ require "trailer.inc";
 
 
 global $conn;
-
 $user = $_GET['user'];
-
 print_header($day, $month, $year, $user);
 echo "<div id=\"dwm_header\" class=\"screenonly\">\n";
 echo make_area_select_html('test.php', $user, $year, $month, $day);

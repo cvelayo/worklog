@@ -547,7 +547,7 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
 
             if (empty($booking['ical_uid']))
             {
-                //$booking['ical_uid'] = generate_global_uid($booking['name']);
+                $booking['ical_uid'] = 1;
             }
             if (empty($booking['ical_sequence']))
             {
@@ -584,7 +584,6 @@ function mrbsMakeBookings($bookings, $id=NULL, $just_check=FALSE, $skip=FALSE, $
             $is_repeat_table = FALSE;
             $result['start_times'] = array($booking['start_time']);
         }
-        echo $new_id;
         $new_details[] = array('id' => $new_id, 'room_id' => $booking['room_id']);
         $booking['id'] = $new_id;  // Add in the id now we know it
 
@@ -845,7 +844,7 @@ function mrbsCreateRepeatingEntrys($data)
     if (count($reps) > $max_rep_entrys)
     {
         $result['id'] = 0;
-        return $result;;
+        return $result;
     }
 
     // If $reps is empty, then this is a single booking, so treat
@@ -866,7 +865,7 @@ function mrbsCreateRepeatingEntrys($data)
     if (count($reps) == count($data['skip_list']))
     {
         $result['id'] = 0;
-        return $result;;
+        return $result;
     }
 
     // Maybe one should also consider adjusting the start_time for
@@ -885,7 +884,6 @@ function mrbsCreateRepeatingEntrys($data)
     //    dependencies by other properties such as the "RECURRENCE-ID".'
 
     $id = mrbsCreateRepeatEntry($data);
-
     if ($id)
     {
         $data['entry_type'] = ENTRY_RPT_ORIGINAL;
@@ -904,7 +902,6 @@ function mrbsCreateRepeatingEntrys($data)
                 $diff += cross_dst($reps[$i], $reps[$i] + $diff);
                 $data['start_time'] = $reps[$i];
                 $data['end_time'] = $reps[$i] + $diff;
-
                 $ent_id = mrbsCreateSingleEntry($data);
                 $result['start_times'][] = $data['start_time'];
             }
